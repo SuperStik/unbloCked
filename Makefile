@@ -1,5 +1,5 @@
 CC ?= cc
-EXE := sdl3test
+EXE := unbloCked
 SRC_DIR := src
 SRC := $(wildcard ${SRC_DIR}/*.c)
 GLSL_SRC := ${SRC_DIR}/glsl
