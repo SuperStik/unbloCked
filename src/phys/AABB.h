@@ -22,7 +22,24 @@ struct UBLC_AABB {
 	__ublcaabb__->zhi = zhi; \
 } while(0)
 
-struct UBLC_AAB *UBLC_AABB_expand(struct UBLC_AABB *, float xa, float ya,
+struct UBLC_AABB *UBLC_AABB_expand(struct UBLC_AABB *, float xa, float ya,
 		float za);
+
+struct UBLC_AABB *UBLC_AABB_grow(struct UBLC_AABB *, float xa, float ya,
+		float za);
+
+float UBLC_AABB_clipXcollide(const struct UBLC_AABB *restrict, const struct
+		UBLC_AABB *restrict c, float xa);
+
+float UBLC_AABB_clipYcollide(const struct UBLC_AABB *restrict, const struct
+		UBLC_AABB *restrict c, float ya);
+
+float UBLC_AABB_clipZcollide(const struct UBLC_AABB *restrict, const struct
+		UBLC_AABB *restrict c, float za);
+
+int UBLC_AABB_intersects(const struct UBLC_AABB *restrict, const struct
+		UBLC_AABB *restrict c);
+
+void UBLC_AABB_move(struct UBLC_AABB *, float xa, float ya, float za);
 
 #endif /* PHYS_AABB_H */
