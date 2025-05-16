@@ -13,7 +13,7 @@ GLSL_DIR = ${OUT_DIR}/glsl
 GLSL_VERT_OUT = $(patsubst ${GLSL_SRC}/%.vert,${GLSL_DIR}/%.vert,${GLSL_VERT})
 GLSL_FRAG_OUT = $(patsubst ${GLSL_SRC}/%.frag,${GLSL_DIR}/%.frag,${GLSL_FRAG})
 
-override LIB += sdl3 m
+override LIB += m pthread sdl3
 override FRAMEWORK += OpenGL
 LIB_FL := $(patsubst %,-l%,${LIB})
 FRAMEWORK_FL := $(patsubst %, -framework %, ${FRAMEWORK})

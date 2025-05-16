@@ -1,4 +1,6 @@
 #include <err.h>
+#include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 
 #include <OpenGL/gl.h>
@@ -7,15 +9,31 @@
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
 #include <SDL3/SDL_mouse.h>
+#include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_video.h>
+
+#include "anon_sem.h"
+
+struct threadinfo {
+	anon_sem_t swapsem;
+	SDL_Window *window;
+	SDL_GLContext gl_context;
+};
+
+static void *render(void *sem);
 
 static int keyevent_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 
+static uint32_t swapwindow;
+static char done = 0;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 int main(void) {
 	puts("Hello unbloCked!");
 	SDL_Window *window;
-	char done = 0;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
@@ -59,10 +77,18 @@ int main(void) {
 	if (!SDL_SetWindowRelativeMouseMode(window, true))
 		warnx("%s", SDL_GetError());
 
-	while (!done) {
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		SDL_GL_SwapWindow(window);
+	swapwindow = SDL_RegisterEvents(1);
+	if (swapwindow == 0)
+		errx(2, "No user events left", NULL);
 
+	struct threadinfo info = {.window = window, .gl_context = gl_context};
+	if (anon_sem_init(&info.swapsem, 1))
+		err(2, NULL);
+
+	pthread_t renderthread;
+	pthread_create(&renderthread, NULL, render, &info);
+
+	while (!done) {
 		SDL_Event event;
 
 		while (!done && SDL_WaitEvent(&event)) {
@@ -80,9 +106,20 @@ int main(void) {
 					mousemotionevent_handler(&event.motion,
 							window);
 					break;
+				case SDL_EVENT_USER:
+					if (event.type == swapwindow) {
+						SDL_GL_SwapWindow(window);
+						anon_sem_post(&info.swapsem);
+					}
 			}
 		}
 	}
+
+	anon_sem_post(&info.swapsem);
+
+	pthread_join(renderthread, NULL);
+
+	anon_sem_destroy(&info.swapsem);
 
 	SDL_SetWindowRelativeMouseMode(window, false);
 	int w, h;
@@ -91,12 +128,37 @@ int main(void) {
 	h /= 2;
 	SDL_WarpMouseInWindow(window, w, h);
 
+	SDL_GL_MakeCurrent(window, gl_context);
+
 	SDL_GL_DestroyContext(gl_context);
 
 	SDL_DestroyWindow(window);
 
 	SDL_Quit();
 	return 0;
+}
+
+static void *render(void *i) {
+	struct threadinfo *info = i;
+	anon_sem_t *swapsem = &(info->swapsem);
+	SDL_GL_MakeCurrent(info->window, info->gl_context);
+	pthread_setname_np("unbloCked.renderthread");
+
+	while (!done) {
+		anon_sem_wait(swapsem);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		SDL_Event event;
+		event.type = SDL_EVENT_USER;
+		event.user.timestamp = SDL_GetTicks();
+		event.user.windowID = -1;
+		event.user.code = swapwindow;
+		event.user.data1 = NULL;
+		event.user.data2 = NULL;
+		SDL_PushEvent(&event);
+	}
+
+	return NULL;
 }
 
 static int keyevent_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
@@ -122,3 +184,5 @@ static void mousemotionevent_handler(SDL_MouseMotionEvent *motion,
 	printf("xrel: %g yrel: %g\n", motion->xrel, motion->yrel);
 	float x, y;
 }
+
+#pragma GCC diagnostic pop
