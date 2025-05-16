@@ -1,6 +1,8 @@
 #include <err.h>
 #include <stdio.h>
 
+#include <OpenGL/gl.h>
+
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
 #include <SDL3/SDL_init.h>
@@ -17,10 +19,39 @@ int main(void) {
 
 	SDL_Init(SDL_INIT_VIDEO);
 
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
+			SDL_GL_CONTEXT_PROFILE_CORE);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+
 	window = SDL_CreateWindow("unbloCked", 640, 480, SDL_WINDOW_OPENGL |
 			SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 	if (window == NULL)
 		errx(2, "%s", SDL_GetError());
+
+	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+	if (gl_context == NULL)
+		errx(2, "%s", SDL_GetError());
+
+	SDL_GL_MakeCurrent(window, gl_context);
+	SDL_GL_SetSwapInterval(1);
+
+	glEnable(GL_TEXTURE_2D);
+	glShadeModel(GL_SMOOTH);
+
+	glClearColor(0.5f, 0.8f, 1.0f, 0.0f);
+	glClearDepth(1.0);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
 
 	if (!SDL_SetWindowMinimumSize(window, 640, 480))
 		warnx("%s", SDL_GetError());
@@ -29,6 +60,9 @@ int main(void) {
 		warnx("%s", SDL_GetError());
 
 	while (!done) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		SDL_GL_SwapWindow(window);
+
 		SDL_Event event;
 
 		while (!done && SDL_WaitEvent(&event)) {
@@ -56,6 +90,8 @@ int main(void) {
 	w /= 2;
 	h /= 2;
 	SDL_WarpMouseInWindow(window, w, h);
+
+	SDL_GL_DestroyContext(gl_context);
 
 	SDL_DestroyWindow(window);
 
