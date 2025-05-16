@@ -15,8 +15,13 @@ GLSL_FRAG_OUT = $(patsubst ${GLSL_SRC}/%.frag,${GLSL_DIR}/%.frag,${GLSL_FRAG})
 
 override LIB += m pthread sdl3
 override FRAMEWORK += OpenGL
+override LIB_PATH += /usr/local/lib
+override INCL_PATH += /usr/local/include
+
 LIB_FL := $(patsubst %,-l%,${LIB})
 FRAMEWORK_FL := $(patsubst %, -framework %, ${FRAMEWORK})
+LIB_PATH_FL := $(patsubst %, -L%, ${LIB_PATH})
+INCL_PATH_FL := $(patsubst %, -I%, ${INCL_PATH})
 
 .PHONY: all clean
 
@@ -30,10 +35,10 @@ override CCFLAGS += -flto
 all: ${OUT} ${GLSL_VERT_OUT} ${GLSL_FRAG_OUT}
 
 ${OUT}: ${OBJ}
-	${CC} $^ -O$O -o $@ ${LIB_FL} ${FRAMEWORK_FL} ${CCFLAGS}
+	${CC} $^ -O$O -o $@ ${LIB_PATH_FL} ${LIB_FL} ${FRAMEWORK_FL} ${CCFLAGS}
 
 ${OBJ_DIR}/%.o: ${SRC_DIR}/%.c ${OBJ_DIR}
-	${CC} $< -O$O -o $@ -c ${CCFLAGS}
+	${CC} $< -O$O -o $@ -c ${INCL_PATH_FL} ${CCFLAGS}
 
 ${GLSL_DIR}/%.vert: ${GLSL_SRC}/%.vert ${GLSL_DIR}
 	cp -f $< $@
