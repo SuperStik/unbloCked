@@ -13,6 +13,7 @@
 #include <SDL3/SDL_video.h>
 
 #include "anon_sem.h"
+#include "level/level.h"
 
 struct threadinfo {
 	anon_sem_t swapsem;
@@ -35,7 +36,7 @@ int main(void) {
 	puts("Hello unbloCked!");
 	SDL_Window *window;
 
-	SDL_Init(SDL_INIT_VIDEO);
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
 			SDL_GL_CONTEXT_PROFILE_CORE);
@@ -81,6 +82,9 @@ int main(void) {
 	if (swapwindow == 0)
 		errx(2, "No user events left", NULL);
 
+	if (UBLC_level_new(256, 256, 64))
+		return 2;
+
 	struct threadinfo info = {.window = window, .gl_context = gl_context};
 	if (anon_sem_init(&info.swapsem, 1))
 		err(2, NULL);
@@ -121,6 +125,8 @@ int main(void) {
 
 	anon_sem_destroy(&info.swapsem);
 
+	UBLC_level_delete();
+
 	SDL_SetWindowRelativeMouseMode(window, false);
 	int w, h;
 	SDL_GetWindowSize(window, &w, &h);
@@ -128,7 +134,7 @@ int main(void) {
 	h /= 2;
 	SDL_WarpMouseInWindow(window, w, h);
 
-	SDL_GL_MakeCurrent(window, gl_context);
+	//SDL_GL_MakeCurrent(window, gl_context);
 
 	SDL_GL_DestroyContext(gl_context);
 

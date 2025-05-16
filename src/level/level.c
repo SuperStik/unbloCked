@@ -10,6 +10,9 @@ unsigned char *blocks;
 unsigned *light_depths;
 
 int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
+	if (blocks != NULL || light_depths != NULL)
+		return -1;
+
 	width = w;
 	height = h;
 	depth = d;
@@ -30,4 +33,22 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 void UBLC_level_delete(void) {
 	free(blocks);
 	free(light_depths);
+
+	blocks = NULL;
+	light_depths = NULL;
+}
+
+int UBLC_level_istile(unsigned x, unsigned y, unsigned z) {
+	if (x >= width && y >= depth && z >= height)
+		return 0;
+
+	return blocks[width * (y * height + z) + x] != 0;
+}
+
+int UBLC_level_issolidtile(unsigned x, unsigned y, unsigned z) {
+	return UBLC_level_istile(x, y, z);
+}
+
+int UBLC_level_islightblocker(unsigned x, unsigned y, unsigned z) {
+	return UBLC_level_issolidtile(x, y, z);
 }
