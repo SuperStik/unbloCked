@@ -17,7 +17,7 @@ GLSL_FRAG_OUT = $(patsubst ${GLSL_SRC}/%.frag,${GLSL_DIR}/%.frag,${GLSL_FRAG})
 override LIB += m pthread sdl3
 override FRAMEWORK += OpenGL
 override LIB_PATH += /usr/local/lib
-override INCL_PATH += /usr/local/include
+override INCL_PATH += src /usr/local/include
 
 LIB_FL := $(patsubst %,-l%,${LIB})
 FRAMEWORK_FL := $(patsubst %, -framework %, ${FRAMEWORK})
