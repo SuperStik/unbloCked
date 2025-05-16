@@ -12,14 +12,14 @@ struct UBLC_AABB {
 };
 
 #define UBLC_AABB_INIT(aabb, xlo, ylo, zlo, xhi, yhi, zhi) do { \
-	struct UBLC_aabb *__ublcaabb__ = (aabb); \
+	struct UBLC_AABB *__ublcaabb__ = (aabb); \
 	__ublcaabb__->_epsilon = 0.0f; \
-	__ublcaabb__->xlo = xlo; \
-	__ublcaabb__->ylo = ylo; \
-	__ublcaabb__->zlo = zlo; \
-	__ublcaabb__->xhi = xhi; \
-	__ublcaabb__->yhi = yhi; \
-	__ublcaabb__->zhi = zhi; \
+	__ublcaabb__->x_lo = xlo; \
+	__ublcaabb__->y_lo = ylo; \
+	__ublcaabb__->z_lo = zlo; \
+	__ublcaabb__->x_hi = xhi; \
+	__ublcaabb__->y_hi = yhi; \
+	__ublcaabb__->z_hi = zhi; \
 } while(0)
 
 struct UBLC_AABB *UBLC_AABB_expand(struct UBLC_AABB *, float xa, float ya,
