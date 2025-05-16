@@ -3,6 +3,7 @@ EXE := unbloCked
 SRC_DIR := src
 SRC := $(wildcard ${SRC_DIR}/*.c)
 SRC += $(wildcard ${SRC_DIR}/phys/*.c)
+SRC += $(wildcard ${SRC_DIR}/level/*.c)
 
 GLSL_SRC := ${SRC_DIR}/glsl
 GLSL_VERT := $(wildcard ${GLSL_SRC}/*.vert)
@@ -49,6 +50,7 @@ ${GLSL_DIR}/%.frag: ${GLSL_SRC}/%.frag ${GLSL_DIR}
 ${OBJ_DIR}:
 	mkdir -p $@
 	mkdir $@/phys
+	mkdir $@/level
 
 ${GLSL_DIR}:
 	mkdir -p $@
