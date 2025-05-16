@@ -73,7 +73,7 @@ const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *aabb,
 	float ylo = rint(aabb->y_lo);
 	float yhi = rint(aabb->y_hi + 1.0f);
 	float zlo = rint(aabb->z_lo);
-	float zhi = rint(aabb->z_hi);
+	float zhi = rint(aabb->z_hi + 1.0f);
 
 	if (xlo < 0.0f)
 		xlo = 0.0f;
