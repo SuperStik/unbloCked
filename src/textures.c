@@ -1,4 +1,5 @@
 #include <err.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -7,6 +8,7 @@
 #include <png.h>
 
 #include "hashmap.h"
+#include "resources.h"
 #include "textures.h"
 
 struct hashmap *idmap;
@@ -46,9 +48,14 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mode);
 
-	FILE *texfile = fopen(resource, "rb");
+	int texture_fd = openat(UBLC_resource_fd, resource, O_RDONLY |
+			O_SHLOCK);
+	if (texture_fd < 0)
+		err(2, "openat: %i %s", UBLC_resource_fd, resource);
+
+	FILE *texfile = fdopen(texture_fd, "rb");
 	if (texfile == NULL)
-		err(2, "fopen", NULL);
+		err(2, "fdopen: %i", texture_fd);
 
 	long width, height;
 	int internalformat;
