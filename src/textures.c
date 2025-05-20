@@ -13,7 +13,7 @@ struct hashmap *idmap;
 size_t texcount;
 static unsigned textures[4096];
 
-static int readpng_init(FILE *, long *width, long *height, int *internalformat,
+static int readpng(FILE *, long *width, long *height, int *internalformat,
 		int *format, png_bytep *image);
 static int typepng2gl(int bit_depth, int color_type, int *format);
 
@@ -54,7 +54,7 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 	int internalformat;
 	int format;
 	png_bytep pixels;
-	if (readpng_init(texfile, &width, &height, &internalformat, &format,
+	if (readpng(texfile, &width, &height, &internalformat, &format,
 				&pixels))
 		errx(2, "readpng: Failed to read PNG", NULL);
 
@@ -76,8 +76,7 @@ void UBLC_textures_bind(unsigned id) {
 
 #pragma GCC diagnostic pop
 
-static int readpng_init(FILE *infile, long *width, long *height,
-	int *internalformat, int *format, png_bytep *image) {
+static int readpng(FILE *infile, long *width, long *height, int *internalformat, int *format, png_bytep *image) {
 	unsigned char sig[8];
 	fread(sig, 1, 8, infile);
 	if (!png_sig_cmp(sig, 0, 8))
