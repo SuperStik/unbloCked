@@ -14,7 +14,7 @@ GLSL_DIR = ${OUT_DIR}/glsl
 GLSL_VERT_OUT = $(patsubst ${GLSL_SRC}/%.vert,${GLSL_DIR}/%.vert,${GLSL_VERT})
 GLSL_FRAG_OUT = $(patsubst ${GLSL_SRC}/%.frag,${GLSL_DIR}/%.frag,${GLSL_FRAG})
 
-override LIB += m pthread sdl3
+override LIB += m png pthread sdl3
 override FRAMEWORK += OpenGL
 override LIB_PATH += /usr/local/lib
 override INCL_PATH += src /usr/local/include
