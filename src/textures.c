@@ -76,7 +76,8 @@ void UBLC_textures_bind(unsigned id) {
 
 #pragma GCC diagnostic pop
 
-static int readpng(FILE *infile, long *width, long *height, int *internalformat, int *format, png_bytep *image) {
+static int readpng(FILE *infile, long *width, long *height, int *internalformat,
+		int *format, png_bytep *image) {
 	unsigned char sig[8];
 	fread(sig, 1, 8, infile);
 	if (!png_sig_cmp(sig, 0, 8))
