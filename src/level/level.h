@@ -1,6 +1,7 @@
 #ifndef LEVEL_LEVEL_H
 #define LEVEL_LEVEL_H 1
 
+#include <stddef.h>
 #include <phys/AABB.h>
 
 int UBLC_level_new(unsigned w, unsigned h, unsigned d);
