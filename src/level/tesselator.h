@@ -10,7 +10,7 @@ struct UBLC_vertex {
 	float r;
 	float g;
 	float b;
-}
+};
 
 void UBLC_tesselator_flush(void);
 void UBLC_tesselator_vertex(struct UBLC_vertex *);

@@ -1,3 +1,5 @@
+#include <stddef.h>
+
 #include "tesselator.h"
 
 #define MAX_VERTICES 100000
