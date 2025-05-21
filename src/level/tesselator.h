@@ -3,6 +3,8 @@
 
 void UBLC_tesselator_flush(void);
 
+void UBLC_tesselator_init(void);
+
 int UBLC_tesselator_setcolor(int enabled);
 int UBLC_tesselator_settexture(int enabled);
 int UBLC_tesselator_getcolor(void);

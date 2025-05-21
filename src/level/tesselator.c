@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <string.h>
 
 #include "tesselator.h"
 
@@ -16,8 +17,15 @@ static struct {
 	unsigned char texture:1;
 } flags;
 
+static void clear(void);
+
 void UBLC_tesselator_flush(void) {
 	vertices = 0;
+}
+
+void UBLC_tesselator_init(void) {
+	clear();
+	memset(&flags, 0, sizeof(flags));
 }
 
 int UBLC_tesselator_setcolor(int enabled) {
@@ -55,4 +63,15 @@ void UBLC_tesselator_vertex(float x, float y, float z, float u, float v, float
 
 	if (++vertices >= MAX_VERTICES)
 		UBLC_tesselator_flush();
+}
+
+static void clear(void) {
+	vertices = 0;
+	for (size_t i = 0; i < (MAX_VERTICES * 3); ++i) {
+		vertexbuffer[i] = 0.0f;
+		colorbuffer[i] = 0.0f;
+	}
+
+	for (size_t i = 0; i < (MAX_VERTICES * 2); ++i)
+		texcoordbuffer[i] = 0.0f;
 }

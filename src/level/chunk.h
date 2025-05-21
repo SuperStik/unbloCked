@@ -20,6 +20,8 @@ extern unsigned UBLC_chunk_updates;
 
 void UBLC_chunk_initstatic(void);
 
+void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer);
+
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *, int x_lo, int y_lo, int
 		z_lo, int x_hi, int y_hi, int z_hi);
 void UBLC_chunk_destroy(struct UBLC_chunk *chunk);
