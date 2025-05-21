@@ -1,17 +1,6 @@
 #ifndef UBLC_LEVEL_TESSELATOR_H
 #define UBLC_LEVEL_TESSELATOR_H 1
 
-struct UBLC_vertex {
-	float x;
-	float y;
-	float z;
-	float u;
-	float v;
-	float r;
-	float g;
-	float b;
-};
-
 void UBLC_tesselator_flush(void);
 
 int UBLC_tesselator_setcolor(int enabled);
@@ -19,6 +8,7 @@ int UBLC_tesselator_settexture(int enabled);
 int UBLC_tesselator_getcolor(void);
 int UBLC_tesselator_getcolor(void);
 
-void UBLC_tesselator_vertex(struct UBLC_vertex *);
+void UBLC_tesselator_vertex(float x, float y, float z, float u, float v, float
+		r, float g, float b);
 
 #endif /* UBLC_LEVEL_TESSELATOR_H */
