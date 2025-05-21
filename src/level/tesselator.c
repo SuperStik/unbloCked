@@ -6,6 +6,7 @@
 
 static size_t vertices = 0;
 
+/* TODO: Use VBOs */
 static float vertexbuffer[MAX_VERTICES * 3];
 static float texcoordbuffer[MAX_VERTICES * 2];
 static float colorbuffer[MAX_VERTICES * 3];

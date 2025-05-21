@@ -22,6 +22,7 @@ void UBLC_chunk_initstatic(void);
 
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *, int x_lo, int y_lo, int
 		z_lo, int x_hi, int y_hi, int z_hi);
+void UBLC_chunk_destroy(struct UBLC_chunk *chunk);
 
 void UBLC_chunk_setdirty(struct UBLC_chunk *);
 
