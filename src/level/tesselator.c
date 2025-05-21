@@ -31,6 +31,14 @@ int UBLC_tesselator_settexture(int enabled) {
 	return old;
 }
 
+int UBLC_tesselator_getcolor(void) {
+	return flags.color;
+}
+
+int UBLC_tesselator_gettexture(void) {
+	return flags.texture;
+}
+
 void UBLC_tesselator_vertex(struct UBLC_vertex *vertex) {
 	vertexbuffer[vertices * 3 + 0] = vertex->x;
 	vertexbuffer[vertices * 3 + 1] = vertex->y;
@@ -43,6 +51,6 @@ void UBLC_tesselator_vertex(struct UBLC_vertex *vertex) {
 	colorbuffer[vertices * 3 + 1] = vertex->g;
 	colorbuffer[vertices * 3 + 2] = vertex->b;
 
-	if (++vertices == MAX_VERTICES)
+	if (++vertices >= MAX_VERTICES)
 		UBLC_tesselator_flush();
 }

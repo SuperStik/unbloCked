@@ -16,6 +16,8 @@ void UBLC_tesselator_flush(void);
 
 int UBLC_tesselator_setcolor(int enabled);
 int UBLC_tesselator_settexture(int enabled);
+int UBLC_tesselator_getcolor(void);
+int UBLC_tesselator_getcolor(void);
 
 void UBLC_tesselator_vertex(struct UBLC_vertex *);
 
