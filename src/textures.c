@@ -65,6 +65,7 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 				&pixels))
 		errx(2, "readpng: Failed to read PNG", NULL);
 
+	free(pixels);
 	fclose(texfile);
 
 	gluBuild2DMipmaps(GL_TEXTURE_2D, internalformat, width, height, format,
@@ -87,21 +88,28 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 		int *format, png_bytep *image) {
 	unsigned char sig[8];
 	fread(sig, 1, 8, infile);
-	if (!png_sig_cmp(sig, 0, 8))
+
+	if (png_sig_cmp(sig, 0, 8)) {
+		warnx("libpng: Bad signature");
 		return -1;
+	}
 
 	png_structp png_reader = png_create_read_struct(PNG_LIBPNG_VER_STRING,
 			NULL, NULL, NULL);
-	if (png_reader == NULL)
+	if (png_reader == NULL) {
+		warnx("libpng: Can't create reader", NULL);
 		return -1;
+	}
 
 	png_infop png_info = png_create_info_struct(png_reader);
 	if (png_info == NULL) {
+		warnx("libpng: Can't create info", NULL);
 		png_destroy_read_struct(&png_reader, NULL, NULL);
 		return -1;
 	}
 
 	if (setjmp(png_jmpbuf(png_reader))) {
+		warnx("libpng: Weird error");
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
@@ -120,18 +128,20 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	*internalformat = typepng2gl(bit_depth, color_type, format);
 
 	if (setjmp(png_jmpbuf(png_reader))) {
+		warnx("libpng: Another weird error");
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
 
-	png_uint_32 rowbytes = png_get_rowbytes(png_reader, png_info);
-	*image = malloc(*width * *height * sizeof(**image) * rowbytes);
+	size_t rowbytes = png_get_rowbytes(png_reader, png_info);
+	*image = malloc((*height) * sizeof(png_bytep) * rowbytes);
 	if (*image == NULL) {
+		warn("malloc", NULL);
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
 
-	png_bytep *rows = malloc(*height * sizeof(png_bytep));
+	png_bytep *rows = malloc((*height) * sizeof(png_bytep));
 	if (rows == NULL) {
 		free(*image);
 		*image = NULL;
@@ -140,7 +150,7 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	}
 
 	for (long i = 0; i < *height; ++i)
-		rows[i] = &(*image[i * *width]);
+		rows[i] = &((*image)[i * (*width)]);
 
 	png_read_image(png_reader, rows);
 

@@ -13,6 +13,7 @@
 #include <SDL3/SDL_video.h>
 
 #include "anon_sem.h"
+#include "level/chunk.h"
 #include "level/level.h"
 
 struct threadinfo {
@@ -149,6 +150,8 @@ static void *render(void *i) {
 	anon_sem_t *swapsem = &(info->swapsem);
 	SDL_GL_MakeCurrent(info->window, info->gl_context);
 	pthread_setname_np("unbloCked.renderthread");
+
+	UBLC_chunk_initstatic();
 
 	while (!done) {
 		anon_sem_wait(swapsem);

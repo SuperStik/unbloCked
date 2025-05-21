@@ -1,12 +1,18 @@
 #include <OpenGL/gl.h>
 
 #include "chunk.h"
+#include "../textures.h"
 
+static long texture = -1;
 int UBLC_chunk_rebuilt_this_frame = 0;
 unsigned UBLC_chunk_updates = 0;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
+void UBLC_chunk_initstatic(void) {
+	texture = UBLC_textures_loadtexture("textures/terrain.png", GL_NEAREST);
+}
 
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 		int z_lo, int x_hi, int y_hi, int z_hi) {
