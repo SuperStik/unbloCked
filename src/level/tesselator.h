@@ -13,6 +13,10 @@ struct UBLC_vertex {
 };
 
 void UBLC_tesselator_flush(void);
+
+int UBLC_tesselator_setcolor(int enabled);
+int UBLC_tesselator_settexture(int enabled);
+
 void UBLC_tesselator_vertex(struct UBLC_vertex *);
 
 #endif /* UBLC_LEVEL_TESSELATOR_H */

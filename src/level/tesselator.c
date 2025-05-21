@@ -10,8 +10,25 @@ static float vertexbuffer[MAX_VERTICES * 3];
 static float texcoordbuffer[MAX_VERTICES * 2];
 static float colorbuffer[MAX_VERTICES * 3];
 
+static struct {
+	unsigned char color:1;
+	unsigned char texture:1;
+} flags;
+
 void UBLC_tesselator_flush(void) {
 	vertices = 0;
+}
+
+int UBLC_tesselator_setcolor(int enabled) {
+	int old = flags.color;
+	flags.color = !!enabled;
+	return old;
+}
+
+int UBLC_tesselator_settexture(int enabled) {
+	int old = flags.texture;
+	flags.texture = !!enabled;
+	return old;
 }
 
 void UBLC_tesselator_vertex(struct UBLC_vertex *vertex) {
