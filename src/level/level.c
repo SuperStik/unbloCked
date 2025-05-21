@@ -20,7 +20,7 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 	UBLC_level_height = h;
 	UBLC_level_depth = d;
 
-	blocks = calloc(w * h * d, sizeof(unsigned char));
+	blocks = malloc(w * h * d * sizeof(unsigned char));
 	if (blocks == NULL)
 		return -1;
 
@@ -37,6 +37,15 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 		return -1;
 	}
 
+	for (unsigned x = 0; x < w; ++x) {
+		for (unsigned y = 0; y < d; ++y) {
+			for (unsigned z = 0; z < h; ++z) {
+				size_t i = (y * h + z) * w + x;
+				blocks[i] = (unsigned char)(y <= ((d * 2) / 3));
+			}
+		}
+	}
+
 	return 0;
 }
 
@@ -48,6 +57,28 @@ void UBLC_level_delete(void) {
 	blocks = NULL;
 	light_depths = NULL;
 	cubes = NULL;
+}
+
+void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
+		unsigned zhi) {
+	for (unsigned x = xlo; x < xlo + xhi; ++x) {
+		for (unsigned z = zlo; z < zlo + zhi; ++z) {
+			unsigned olddepth = light_depths[x + z *
+				UBLC_level_width];
+
+			unsigned y;
+			for (y = UBLC_level_depth - 1; y > 0 &&
+					!UBLC_level_islightblocker(x, y, z);
+					--y);
+
+			light_depths[x + z * UBLC_level_width] = y;
+			if (olddepth == y)
+				continue;
+
+			unsigned yl_lo = (olddepth < y) ? olddepth : y;
+			unsigned yl_hi = (olddepth > y) ? olddepth : y;
+		}
+	}
 }
 
 int UBLC_level_istile(unsigned x, unsigned y, unsigned z) {
