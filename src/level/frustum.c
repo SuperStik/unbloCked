@@ -44,8 +44,9 @@ static void calculate(gvec(float,4) frustum[6]) {
 	}
 
 	for (int i = 0; i < 6; i += 2) {
+		float inv = ((i / 2) & 1) ? -1.0f : 1.0f;
+
 		for (int j = 0; j < 4; ++j) {
-			float inv = ((i / 2) & 1) ? -1.0f : 1.0f;
 			frustum[i][j] = clip.mat[j][3] - clip.mat[0][i / 2] *
 				inv;
 			frustum[i+1][j] = clip.mat[j][3] + clip.mat[0][i / 2] *
