@@ -20,7 +20,7 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 	UBLC_level_height = h;
 	UBLC_level_depth = d;
 
-	blocks = malloc(w * h * d * sizeof(unsigned char));
+	blocks = malloc((size_t)w * h * d * sizeof(unsigned char));
 	if (blocks == NULL)
 		return -1;
 
@@ -82,19 +82,19 @@ void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
 }
 
 int UBLC_level_istile(unsigned x, unsigned y, unsigned z) {
-	if (x >= UBLC_level_width && y >= UBLC_level_depth && z >=
+	if (x >= UBLC_level_width || y >= UBLC_level_depth || z >=
 			UBLC_level_height)
 		return 0;
 
-	return blocks[UBLC_level_width * (y * UBLC_level_height + z) + x] != 0;
+	return blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] != 0;
 }
 
-int UBLC_level_issolidtile(unsigned x, unsigned y, unsigned z) {
+int UBLC_level_issolid(unsigned x, unsigned y, unsigned z) {
 	return UBLC_level_istile(x, y, z);
 }
 
 int UBLC_level_islightblocker(unsigned x, unsigned y, unsigned z) {
-	return UBLC_level_issolidtile(x, y, z);
+	return UBLC_level_issolid(x, y, z);
 }
 
 const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *aabb,

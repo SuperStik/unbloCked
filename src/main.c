@@ -4,6 +4,7 @@
 #include <stdio.h>
 
 #include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 
 #include <SDL3/SDL_error.h>
 #include <SDL3/SDL_events.h>
@@ -16,6 +17,7 @@
 #include "level/chunk.h"
 #include "level/levelrenderer.h"
 #include "level/level.h"
+#include "timer.h"
 
 struct threadinfo {
 	anon_sem_t swapsem;
@@ -121,9 +123,11 @@ int main(void) {
 		}
 	}
 
-	anon_sem_post(&info.swapsem);
+	anon_sem_post(&(info.swapsem));
 
 	pthread_join(renderthread, NULL);
+
+	anon_sem_post(&(info.swapsem));
 
 	anon_sem_destroy(&info.swapsem);
 
@@ -146,11 +150,31 @@ int main(void) {
 	return 0;
 }
 
+static void setupcamera(float a) {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	/* TODO: handle changing resolutions */
+	gluPerspective(70.0f, 640.0f / 480.0f, 0.05, 1000.0f);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
 static void *render(void *i) {
 	struct threadinfo *info = i;
 	anon_sem_t *swapsem = &(info->swapsem);
 	SDL_GL_MakeCurrent(info->window, info->gl_context);
 	pthread_setname_np("unbloCked.renderthread");
+
+	const float fogcolor[4] = {
+		(14.0f/255.0f),
+		(11.0f/255.0f),
+		(10.0f/255.0f),
+		1.0f
+	};
+
+	UBLC_timer_init(60.0f);
 
 	UBLC_chunk_initstatic();
 
@@ -158,7 +182,26 @@ static void *render(void *i) {
 
 	while (!done) {
 		anon_sem_wait(swapsem);
+
+		UBLC_timer_advancetime();
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		setupcamera(UBLC_timer_a);
+
+		glEnable(GL_CULL_FACE);
+
+		glEnable(GL_FOG);
+		glFogi(GL_FOG_MODE, GL_EXP);
+		glFogf(GL_FOG_DENSITY, 0.2f);
+		glFogfv(GL_FOG_COLOR, fogcolor);
+
+		glDisable(GL_FOG);
+		UBLC_levelrenderer_render(NULL, 0);
+		glEnable(GL_FOG);
+		UBLC_levelrenderer_render(NULL, 1);
+		glDisable(GL_TEXTURE_2D);
+		glDisable(GL_FOG);
 
 		SDL_Event event;
 		event.type = SDL_EVENT_USER;

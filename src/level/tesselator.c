@@ -1,6 +1,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <OpenGL/gl.h>
+
 #include "tesselator.h"
 
 #define MAX_VERTICES 100000
@@ -19,9 +21,40 @@ static struct {
 
 static void clear(void);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 void UBLC_tesselator_flush(void) {
-	vertices = 0;
+	glVertexPointer(3, GL_FLOAT, 0, vertexbuffer);
+
+	if (flags.texture)
+		glTexCoordPointer(2, GL_FLOAT, 0, texcoordbuffer);
+
+	if (flags.color)
+		glColorPointer(3, GL_FLOAT, 0, colorbuffer);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	if (flags.texture)
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if (flags.color)
+		glEnableClientState(GL_COLOR_ARRAY);
+
+	glDrawArrays(GL_QUADS, GL_POINTS, vertices);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+
+	if (flags.texture)
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	if (flags.color)
+		glDisableClientState(GL_COLOR_ARRAY);
+
+	clear();
 }
+
+#pragma GCC diagnostic pop
 
 void UBLC_tesselator_init(void) {
 	clear();

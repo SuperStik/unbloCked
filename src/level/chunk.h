@@ -5,12 +5,12 @@
 
 struct UBLC_chunk {
 	struct UBLC_AABB aabb;
-	int x_lo;
-	int y_lo;
-	int z_lo;
-	int x_hi;
-	int y_hi;
-	int z_hi;
+	unsigned x_lo;
+	unsigned y_lo;
+	unsigned z_lo;
+	unsigned x_hi;
+	unsigned y_hi;
+	unsigned z_hi;
 	unsigned _lists;
 	unsigned char _dirty:1;
 };

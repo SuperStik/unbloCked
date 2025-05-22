@@ -56,14 +56,15 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 	++UBLC_chunk_rebuilt_this_frame;
 
 	glNewList(chunk->_lists + layer, GL_COMPILE);
+
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	UBLC_tesselator_init();
 
-	for (int x = chunk->x_lo; x < chunk->x_hi; ++x) {
-		for (int y = chunk->y_lo; y < chunk->y_hi; ++y) {
-			for (int z = chunk->z_lo; z < chunk->z_hi; ++z) {
+	for (unsigned x = chunk->x_lo; x < chunk->x_hi; ++x) {
+		for (unsigned y = chunk->y_lo; y < chunk->y_hi; ++y) {
+			for (unsigned z = chunk->z_lo; z < chunk->z_hi; ++z) {
 				if (!UBLC_level_istile(x, y, z))
 					continue;
 
