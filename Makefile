@@ -37,7 +37,7 @@ OUT := ${OUT_DIR}/${EXE}
 
 O ?= 2
 
-override CCFLAGS += -flto
+override CCFLAGS += -flto -funsafe-math-optimizations -fno-math-errno
 
 all: ${OUT} ${GLSL_VERT_OUT} ${GLSL_FRAG_OUT} ${RES_OUT}
 	echo ${RES_OUT}
