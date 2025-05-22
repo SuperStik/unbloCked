@@ -49,6 +49,9 @@ void UBLC_levelrenderer_init(void) {
 }
 
 void UBLC_levelrenderer_delete(void) {
+	for (size_t i = 0; i < ((size_t)xchunks * ychunks * zchunks); ++i)
+		UBLC_chunk_delete(chunks + i);
+
 	free(chunks);
 	chunks = NULL;
 }

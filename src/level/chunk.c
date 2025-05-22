@@ -43,7 +43,7 @@ struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 	return chunk;
 }
 
-void UBLC_chunk_destroy(struct UBLC_chunk *chunk) {
+void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
 	glDeleteLists(chunk->_lists, 2);
 }
 
