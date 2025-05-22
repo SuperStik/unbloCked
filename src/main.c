@@ -14,6 +14,7 @@
 
 #include "anon_sem.h"
 #include "level/chunk.h"
+#include "level/levelrenderer.h"
 #include "level/level.h"
 
 struct threadinfo {
@@ -153,6 +154,8 @@ static void *render(void *i) {
 
 	UBLC_chunk_initstatic();
 
+	UBLC_levelrenderer_init();
+
 	while (!done) {
 		anon_sem_wait(swapsem);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -166,6 +169,8 @@ static void *render(void *i) {
 		event.user.data2 = NULL;
 		SDL_PushEvent(&event);
 	}
+
+	UBLC_levelrenderer_delete();
 
 	return NULL;
 }
