@@ -14,7 +14,7 @@ gvec(float,4) *UBLC_frustum_get(gvec(float,4) frustum[6]) {
 
 static gvec(float,4) normalizeplane(gvec(float,4) frustum) {
 	float magnitude = sqrtf((frustum[0] * frustum[0]) + (frustum[1] *
-				frustum[1]) + (frustum[2] * frustum[2]) *
+				frustum[1]) + (frustum[2] * frustum[2]) +
 			(frustum[3] * frustum[3]));
 
 	frustum /= magnitude;
