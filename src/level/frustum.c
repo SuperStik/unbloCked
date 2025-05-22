@@ -12,6 +12,53 @@ gvec(float,4) *UBLC_frustum_get(gvec(float,4) frustum[6]) {
 	return frustum;
 }
 
+int UBLC_frustum_haspoint(const gvec(float,4) frustum[6], float x, float y,
+		float z) {
+	for (int i = 0; i < 6; ++i) {
+		if ((frustum[i][0] * x + frustum[i][1] * y + frustum[i][2] * z)
+				<= 0.0f)
+			return 0;
+	}
+
+	return 1;
+}
+
+int UBLC_frustum_hassphere(const gvec(float,4) frustum[6], float x, float y,
+		float z, float radius) {
+	for (int i = 0; i < 6; ++i) {
+		if ((frustum[i][0] * x + frustum[i][1] * y + frustum[i][2] * z)
+				<= -radius)
+			return 0;
+	}
+
+	return 1;
+}
+
+int UBLC_frustum_hascube(const gvec(float,4) frustum[6], float xlo, float
+		ylo, float zlo, float xhi, float yhi, float zhi) {
+	float x[2] = {xlo, xhi};
+	float y[2] = {ylo, yhi};
+	float z[2] = {zlo, zhi};
+
+	/* egyptian pyramids */
+	for (int i = 0; i < 6; ++i) {
+		for (int j = 0; j < 2; ++j) {
+			for (int k = 0; k < 2; ++k) {
+				for (int l = 0; l < 2; ++l) {
+					if ((frustum[i][0] * x[j] +
+								frustum[i][1] *
+								y[k] +
+								frustum[i][2] *
+								z[l]) <= 0)
+						return 0;
+				}
+			}
+		}
+	}
+
+	return 1;
+}
+
 static gvec(float,4) normalizeplane(gvec(float,4) frustum) {
 	float magnitude = sqrtf((frustum[0] * frustum[0]) + (frustum[1] *
 				frustum[1]) + (frustum[2] * frustum[2]) +
