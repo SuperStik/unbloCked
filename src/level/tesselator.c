@@ -1,7 +1,9 @@
+#include <err.h>
 #include <stddef.h>
 #include <string.h>
 
 #include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 
 #include "tesselator.h"
 

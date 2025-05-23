@@ -6,12 +6,7 @@
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 
-#include <SDL3/SDL_error.h>
-#include <SDL3/SDL_events.h>
-#include <SDL3/SDL_init.h>
-#include <SDL3/SDL_mouse.h>
-#include <SDL3/SDL_timer.h>
-#include <SDL3/SDL_video.h>
+#include <SDL3/SDL.h>
 
 #include "anon_sem.h"
 #include "level/chunk.h"
@@ -43,7 +38,7 @@ int main(void) {
 	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
 
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK,
-			SDL_GL_CONTEXT_PROFILE_CORE);
+			SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
 
@@ -64,6 +59,7 @@ int main(void) {
 	SDL_GL_SetSwapInterval(1);
 
 	glEnable(GL_TEXTURE_2D);
+
 	glShadeModel(GL_SMOOTH);
 
 	glClearColor(0.5f, 0.8f, 1.0f, 0.0f);
@@ -71,7 +67,7 @@ int main(void) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-
+	
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
@@ -188,6 +184,7 @@ static void *render(void *i) {
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		setupcamera(UBLC_timer_a);
+		glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
 
 		glEnable(GL_CULL_FACE);
 
