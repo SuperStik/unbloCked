@@ -22,12 +22,17 @@ struct threadinfo {
 };
 
 static void *render(void *sem);
+static void *tick(void *_);
 
 static int keyevent_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 
 static uint32_t swapwindow;
+
+float aspect = 640.0f / 480.0f;
+
 static char done = 0;
+
 static struct UBLC_player player;
 
 #pragma GCC diagnostic push
@@ -94,8 +99,9 @@ int main(void) {
 	if (anon_sem_init(&info.swapsem, 1))
 		err(2, NULL);
 
-	pthread_t renderthread;
-	pthread_create(&renderthread, NULL, render, &info);
+	pthread_t threads[2];
+	pthread_create(&(threads[0]), NULL, render, &info);
+	pthread_create(&(threads[1]), NULL, tick, NULL);
 
 	while (!done) {
 		SDL_Event event;
@@ -120,13 +126,18 @@ int main(void) {
 						SDL_GL_SwapWindow(window);
 						anon_sem_post(&info.swapsem);
 					}
+					break;
+				case SDL_EVENT_WINDOW_RESIZED:
+					aspect = (float)event.window.data1 /
+						(float)event.window.data2;
 			}
 		}
 	}
 
 	anon_sem_post(&(info.swapsem));
 
-	pthread_join(renderthread, NULL);
+	for (int i = 0; i < 2; ++i)
+		pthread_join(threads[i], NULL);
 
 	anon_sem_post(&(info.swapsem));
 
@@ -167,7 +178,7 @@ static void setupcamera(float a) {
 	glLoadIdentity();
 
 	/* TODO: handle changing resolutions */
-	gluPerspective(70.0f, 640.0f / 480.0f, 0.05, 1000.0f);
+	gluPerspective(70.0f, aspect, 0.05, 1000.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
@@ -196,14 +207,9 @@ static void *render(void *i) {
 	while (!done) {
 		anon_sem_wait(swapsem);
 
-		UBLC_timer_advancetime();
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		UBLC_player_tick(&player);
-
 		setupcamera(UBLC_timer_a);
-		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
 
 		glEnable(GL_CULL_FACE);
 
@@ -213,9 +219,9 @@ static void *render(void *i) {
 		glFogfv(GL_FOG_COLOR, fogcolor);
 
 		glDisable(GL_FOG);
-		UBLC_levelrenderer_render(NULL, 0);
+		UBLC_levelrenderer_render(&player, 0);
 		glEnable(GL_FOG);
-		UBLC_levelrenderer_render(NULL, 1);
+		UBLC_levelrenderer_render(&player, 1);
 		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_FOG);
 
@@ -230,6 +236,21 @@ static void *render(void *i) {
 	}
 
 	UBLC_levelrenderer_delete();
+
+	return NULL;
+}
+
+static void *tick(void *_) {
+	(void)_;
+
+	pthread_setname_np("unbloCked.tickthread");
+
+	while (!done) {
+		UBLC_timer_advancetime();
+		UBLC_player_tick(&player);
+		struct timespec sleeping = {.tv_sec = 0, .tv_nsec = 600000000};
+		nanosleep(&sleeping, NULL);
+	}
 
 	return NULL;
 }
@@ -254,8 +275,7 @@ static int keyevent_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 
 static void mousemotionevent_handler(SDL_MouseMotionEvent *motion,
 		SDL_Window *window) {
-	printf("xrel: %g yrel: %g\n", motion->xrel, motion->yrel);
-	float x, y;
+	UBLC_player_turn(&player, motion->xrel, motion->yrel);
 }
 
 #pragma GCC diagnostic pop
