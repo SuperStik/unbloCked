@@ -22,6 +22,7 @@ struct UBLC_player {
 struct UBLC_player *UBLC_player_init(struct UBLC_player *);
 
 void UBLC_player_turn(struct UBLC_player *, float xo, float yo);
+void UBLC_player_tick(struct UBLC_player *ply);
 void UBLC_player_move(struct UBLC_player *, float xa, float ya, float za);
 void UBLC_player_moverelative(struct UBLC_player *, float xa, float za, float
 		speed);

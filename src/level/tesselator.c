@@ -44,6 +44,9 @@ void UBLC_tesselator_flush(void) {
 		glEnableClientState(GL_COLOR_ARRAY);
 
 	glDrawArrays(GL_QUADS, GL_POINTS, vertices);
+	GLenum glerr = glGetError();
+	if (glerr)
+		warnx("glDrawArrays: %s", gluErrorString(glerr));
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 

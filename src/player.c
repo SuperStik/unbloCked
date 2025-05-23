@@ -27,6 +27,26 @@ void UBLC_player_turn(struct UBLC_player *ply, float xo, float yo) {
 		ply->pitch = newpitch;
 }
 
+void UBLC_player_tick(struct UBLC_player *ply) {
+	ply->xo = ply->x;
+	ply->yo = ply->y;
+	ply->zo = ply->z;
+	float xa = 0.0f;
+	float ya = 0.0f;
+
+	UBLC_player_moverelative(ply, xa, ya, ply->onground ? 0.02f : 0.005f);
+	ply->yd = (ply->yd - 0.05f);
+	UBLC_player_move(ply, ply->xd, ply->yd, ply->zd);
+	ply->xd *= 0.91f;
+	ply->yd *= 0.98f;
+	ply->zd *= 0.91f;
+	
+	if (ply->onground) {
+		ply->xd *= 0.8f;
+		ply->zd *= 0.8f;
+	}
+}
+
 void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 	float xaOrg = xa;
 	float yaOrg = ya;

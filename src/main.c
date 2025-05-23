@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <time.h>
 
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -27,11 +28,13 @@ static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 
 static uint32_t swapwindow;
 static char done = 0;
+static struct UBLC_player player;
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 int main(void) {
+	srand48(time(NULL));
 	puts("Hello unbloCked!");
 	SDL_Window *window;
 
@@ -67,7 +70,7 @@ int main(void) {
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	
+
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW);
@@ -84,6 +87,8 @@ int main(void) {
 
 	if (UBLC_level_new(256, 256, 64))
 		return 2;
+
+	UBLC_player_init(&player);
 
 	struct threadinfo info = {.window = window, .gl_context = gl_context};
 	if (anon_sem_init(&info.swapsem, 1))
@@ -146,6 +151,17 @@ int main(void) {
 	return 0;
 }
 
+static void movecameratoplayer(float a) {
+	glTranslatef(0.0f, 0.0f, -0.3f);
+	glRotatef(player.pitch, 1.0f, 0.0f, 0.0f);
+	glRotatef(player.yaw, 0.0f, 1.0f, 0.0f);
+
+	float x = player.xo + (player.x - player.xo) * a;
+	float y = player.yo + (player.y - player.yo) * a;
+	float z = player.zo + (player.z - player.zo) * a;
+	glTranslatef(-x, -y, -z);
+}
+
 static void setupcamera(float a) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -155,6 +171,7 @@ static void setupcamera(float a) {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	movecameratoplayer(a);
 }
 
 static void *render(void *i) {
@@ -183,8 +200,10 @@ static void *render(void *i) {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		UBLC_player_tick(&player);
+
 		setupcamera(UBLC_timer_a);
-		glRotatef(-90.0f, 0.0f, 1.0f, 0.0f);
+		glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
 
 		glEnable(GL_CULL_FACE);
 
