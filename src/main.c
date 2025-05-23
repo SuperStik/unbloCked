@@ -177,8 +177,7 @@ static void setupcamera(float a) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	/* TODO: handle changing resolutions */
-	gluPerspective(70.0f, aspect, 0.05, 1000.0f);
+	gluPerspective(90.0f, aspect, 0.05, 1000.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
