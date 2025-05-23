@@ -67,8 +67,12 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 
 	fclose(texfile);
 
-	gluBuild2DMipmaps(GL_TEXTURE_2D, internalformat, width, height, format,
+	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format,
 			GL_UNSIGNED_BYTE, pixels);
+	GLenum glerr = glGetError();
+	if (glerr)
+		warnx("glTexImage2D: %s", gluErrorString(glerr));
+	/* glGenerateMipmap(GL_TEXTURE_2D); */
 
 	free(pixels);
 
