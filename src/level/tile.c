@@ -4,9 +4,9 @@
 
 void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 	float ulo = (float)tex / 16.0f;
-	float uhi = ulo + 0.999f / 16.0f;
+	float uhi = ulo + 1.0f / 16.0f;
 	float vlo = 0.0f;
-	float vhi = vlo + 0.999f / 16.0f;
+	float vhi = vlo + 1.0f / 16.0f;
 
 	float side = 1.0f;
 	float frnt = 0.8f;

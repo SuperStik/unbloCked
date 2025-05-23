@@ -125,6 +125,9 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	*width = w;
 	*height = h;
 
+	if (color_type & PNG_COLOR_MASK_PALETTE)
+		png_set_palette_to_rgb(png_reader);
+
 	*internalformat = typepng2gl(bit_depth, color_type, format);
 
 	if (setjmp(png_jmpbuf(png_reader))) {
@@ -172,6 +175,8 @@ static int typepng2gl(int bit_depth, int color_type, int *format) {
 					*format = GL_LUMINANCE;
 					break;
 				default:
+					warnx("pngreader: bad color type: %i\n",
+							color_type);
 					internalformat = -1;
 					*format = -1;
 			}
@@ -186,6 +191,7 @@ static int typepng2gl(int bit_depth, int color_type, int *format) {
 					internalformat = GL_LUMINANCE8_ALPHA8;
 					*format = GL_LUMINANCE_ALPHA;
 					break;
+				case PNG_COLOR_TYPE_PALETTE:
 				case PNG_COLOR_TYPE_RGB:
 					internalformat = GL_RGB8;
 					*format = GL_RGB;
@@ -195,6 +201,8 @@ static int typepng2gl(int bit_depth, int color_type, int *format) {
 					*format = GL_RGBA;
 					break;
 				default:
+					warnx("pngreader: bad color type: %i\n",
+							color_type);
 					internalformat = -1;
 					*format = -1;
 			}
