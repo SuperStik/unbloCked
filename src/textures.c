@@ -65,11 +65,12 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 				&pixels))
 		errx(2, "readpng: Failed to read PNG", NULL);
 
-	free(pixels);
 	fclose(texfile);
 
 	gluBuild2DMipmaps(GL_TEXTURE_2D, internalformat, width, height, format,
 			GL_UNSIGNED_BYTE, pixels);
+
+	free(pixels);
 
 	return id;
 }
