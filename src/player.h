@@ -17,6 +17,7 @@ struct UBLC_player {
 	float yaw;
 	struct UBLC_AABB aabb;
 	unsigned char onground:1;
+	unsigned char gravity:1;
 };
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *);

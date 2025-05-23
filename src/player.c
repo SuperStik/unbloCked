@@ -11,6 +11,7 @@ static void setpos(struct UBLC_player *ply, float x, float y, float z);
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
 	ply->onground = 0;
+	ply->gravity = 0;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 
@@ -36,7 +37,8 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	float ya = 0.0f;
 
 	UBLC_player_moverelative(ply, xa, ya, ply->onground ? 0.02f : 0.005f);
-	//ply->yd = (ply->yd - 0.05f);
+	if (ply->gravity)
+		ply->yd = (ply->yd - 0.05f);
 	UBLC_player_move(ply, ply->xd, ply->yd, ply->zd);
 	ply->xd *= 0.91f;
 	ply->yd *= 0.98f;

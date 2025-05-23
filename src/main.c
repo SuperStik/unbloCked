@@ -248,7 +248,9 @@ static void *tick(void *_) {
 	while (!done) {
 		UBLC_timer_advancetime();
 		UBLC_player_tick(&player);
-		struct timespec sleeping = {.tv_sec = 0, .tv_nsec = 600000000};
+
+		long sleeptime = 999999999 / 60;
+		struct timespec sleeping = {.tv_sec = 0, .tv_nsec = sleeptime};
 		nanosleep(&sleeping, NULL);
 	}
 
@@ -256,20 +258,29 @@ static void *tick(void *_) {
 }
 
 static int keyevent_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
-	if (key->down && key->key == SDLK_L) {
-		bool relative = SDL_GetWindowRelativeMouseMode(window);
-		if (!SDL_SetWindowRelativeMouseMode(window, !relative))
-			warnx("%s", SDL_GetError());
+	if (!(key->down))
+		goto keyevent_ret;
 
-		if (relative) {
-			int w, h;
-			SDL_GetWindowSize(window, &w, &h);
-			w /= 2;
-			h /= 2;
-			SDL_WarpMouseInWindow(window, w, h);
-		}
+	switch(key->key) {
+		case SDLK_G:
+			player.gravity = !player.gravity;
+			break;
+		case SDLK_L:;
+			bool relative = SDL_GetWindowRelativeMouseMode(window);
+			if (!SDL_SetWindowRelativeMouseMode(window, !relative))
+				warnx("%s", SDL_GetError());
+
+			if (relative) {
+				int w, h;
+				SDL_GetWindowSize(window, &w, &h);
+				w /= 2;
+				h /= 2;
+				SDL_WarpMouseInWindow(window, w, h);
+			}
+			break;
 	}
 
+keyevent_ret:
 	return key->down && key->key == SDLK_ESCAPE;
 }
 
