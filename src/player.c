@@ -107,7 +107,7 @@ void UBLC_player_moverelative(struct UBLC_player *ply, float xa, float za, float
 
 static void resetpos(struct UBLC_player *ply) {
 	float x = (float)drand48() * (float)UBLC_level_width;
-	float y = (float)(UBLC_level_depth + 40);
+	float y = (float)(UBLC_level_depth + 10);
 	float z = (float)drand48() * (float)UBLC_level_height;
 	setpos(ply, x, y, z);
 }
