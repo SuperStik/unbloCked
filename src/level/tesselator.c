@@ -94,6 +94,7 @@ void UBLC_tesselator_vertex(float x, float y, float z, float u, float v, float
 
 	texcoordbuffer[vertices * 2 + 0] = u;
 	texcoordbuffer[vertices * 2 + 1] = v;
+	//warnx("%g", v);
 
 	colorbuffer[vertices * 3 + 0] = r;
 	colorbuffer[vertices * 3 + 1] = g;
