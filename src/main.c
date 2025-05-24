@@ -1,11 +1,11 @@
 #include <err.h>
+#include <math.h>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <time.h>
 
 #include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
 
 #include <SDL3/SDL.h>
 
@@ -173,11 +173,42 @@ static void movecameratoplayer(float a) {
 	glTranslatef(-x, -y, -z);
 }
 
+static void frustum(float matrix[16], float left, float right, float bottom,
+		float top, float znear, float zfar) {
+	float temp, temp2, temp3, temp4;
+	temp = 2.0 * znear;
+	temp2 = right - left;
+	temp3 = top - bottom;
+	temp4 = zfar - znear;
+	matrix[0] = temp / temp2;
+	matrix[1] = 0.0f;
+	matrix[2] = 0.0f;
+	matrix[3] = 0.0f;
+	matrix[4] = 0.0f;
+	matrix[5] = temp / temp3;
+	matrix[6] = 0.0f;
+	matrix[7] = 0.0f;
+	matrix[8] = (right + left) / temp2;
+	matrix[9] = (top + bottom) / temp3;
+	matrix[10] = (-zfar - znear) / temp4;
+	matrix[11] = -1.0;
+	matrix[12] = 0.0f;
+	matrix[13] = 0.0f;
+	matrix[14] = (-temp * zfar) / temp4;
+	matrix[15] = 0.0f;
+}
+
 static void setupcamera(float a) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(90.0f, aspect, 0.05, 1000.0f);
+	float ymax, xmax;
+	ymax = 0.05 * __tanpif(90.0f / 360.0f);
+	xmax = ymax * aspect;
+
+	float matrix[16];
+	frustum(matrix, -xmax, xmax, -ymax, ymax, 0.05, 1000.0f);
+	glLoadMatrixf(matrix);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
