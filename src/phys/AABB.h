@@ -1,8 +1,9 @@
 #ifndef PHYS_AABB_H
 #define PHYS_AABB_H 1
 
+#define UBLC_AABB_EPSILON 0.0f
+
 struct UBLC_AABB {
-	float _epsilon;
 	float x_lo;
 	float y_lo;
 	float z_lo;
@@ -13,7 +14,6 @@ struct UBLC_AABB {
 
 #define UBLC_AABB_INIT(aabb, xlo, ylo, zlo, xhi, yhi, zhi) do { \
 	struct UBLC_AABB *__ublcaabb__ = (aabb); \
-	__ublcaabb__->_epsilon = 0.0f; \
 	__ublcaabb__->x_lo = xlo; \
 	__ublcaabb__->y_lo = ylo; \
 	__ublcaabb__->z_lo = zlo; \

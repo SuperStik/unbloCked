@@ -12,7 +12,7 @@ static void setpos(struct UBLC_player *ply, float x, float y, float z);
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
 	ply->onground = 0;
-	ply->gravity = 0;
+	ply->gravity = 1;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 

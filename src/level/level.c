@@ -1,3 +1,4 @@
+#include <err.h>
 #include <math.h>
 #include <stdlib.h>
 
@@ -99,12 +100,12 @@ int UBLC_level_islightblocker(unsigned x, unsigned y, unsigned z) {
 
 const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *aabb,
 		size_t *count) {
-	float xlo = rintf(aabb->x_lo);
-	float xhi = rintf(aabb->x_hi + 1.0f);
-	float ylo = rintf(aabb->y_lo);
-	float yhi = rintf(aabb->y_hi + 1.0f);
-	float zlo = rintf(aabb->z_lo);
-	float zhi = rintf(aabb->z_hi + 1.0f);
+	float xlo = floorf(aabb->x_lo);
+	float xhi = floorf(aabb->x_hi + 1.0f);
+	float ylo = floorf(aabb->y_lo);
+	float yhi = floorf(aabb->y_hi + 1.0f);
+	float zlo = floorf(aabb->z_lo);
+	float zhi = floorf(aabb->z_hi + 1.0f);
 
 	if (xlo < 0.0f)
 		xlo = 0.0f;
