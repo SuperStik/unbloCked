@@ -1,3 +1,4 @@
+#include <err.h>
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,7 +39,7 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 
 	UBLC_player_moverelative(ply, xa, ya, ply->onground ? 0.02f : 0.005f);
 	if (ply->gravity)
-		ply->yd = (ply->yd - 0.05f);
+		ply->yd = (ply->yd - 0.005f);
 	UBLC_player_move(ply, ply->xd, ply->yd, ply->zd);
 	ply->xd *= 0.91f;
 	ply->yd *= 0.98f;
@@ -55,24 +56,18 @@ void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 	float yaOrg = ya;
 	float zaOrg = za;
 	size_t count;
-	struct UBLC_AABB expanded;
+	struct UBLC_AABB expanded = ply->aabb;
 
-	memcpy(&expanded, &(ply->aabb), sizeof(expanded));
 	UBLC_AABB_expand(&expanded, xa, ya, za);
 
 	const struct UBLC_AABB *aabbs = UBLC_level_getcubes(&expanded, &count);
 
-	for (size_t i = 0; i < count; ++i)
-		ya = UBLC_AABB_clipYcollide(&aabbs[i], &(ply->aabb), ya);
-	UBLC_AABB_move(&(ply->aabb), 0, ya, 0);
-
-	for (size_t i = 0; i < count; ++i)
-		xa = UBLC_AABB_clipXcollide(&aabbs[i], &(ply->aabb), xa);
-	UBLC_AABB_move(&(ply->aabb), xa, 0, 0);
-
-	for (size_t i = 0; i < count; ++i)
-		za = UBLC_AABB_clipZcollide(&aabbs[i], &(ply->aabb), za);
-	UBLC_AABB_move(&(ply->aabb), 0, 0, za);
+	for (size_t i = 0; i < count; ++i) {
+		ya = UBLC_AABB_clipYcollide(aabbs + i, &(ply->aabb), ya);
+		xa = UBLC_AABB_clipXcollide(aabbs + i, &(ply->aabb), xa);
+		za = UBLC_AABB_clipZcollide(aabbs + i, &(ply->aabb), za);
+	}
+	UBLC_AABB_move(&(ply->aabb), xa, ya, za);
 
 	ply->onground = yaOrg != ya && yaOrg < 0.0f;
 

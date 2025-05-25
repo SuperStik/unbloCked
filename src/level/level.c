@@ -116,24 +116,28 @@ const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *aabb,
 		zlo = 0.0f;
 
 	float width = (float)UBLC_level_width;
-	if (xhi < width)
+	if (xhi > width)
 		xhi = width;
 
 	float depth = (float)UBLC_level_depth;
-	if (yhi < depth)
+	if (yhi > depth)
 		yhi = depth;
 
 	float height = (float)UBLC_level_height;
-	if (zhi < height)
+	if (zhi > height)
 		zhi = height;
 
 	numcubes = 0;
 
-	for (float x = xlo; x < xhi; ++x) {
-		for (float y = ylo; y < yhi; ++y) {
-			for (float z = zlo; z < zhi; ++z) {
-				UBLC_AABB_INIT(&cubes[numcubes++], x, y, z, x +
+	for (float x = xlo; x < xhi; x += 1.0f) {
+		for (float y = ylo; y < yhi; y += 1.0f) {
+			for (float z = zlo; z < zhi; z += 1.0f) {
+				if (!UBLC_level_issolid(x,y,z))
+					continue;
+
+				UBLC_AABB_INIT(&cubes[numcubes], x, y, z, x +
 						1, y + 1, z + 1);
+				++numcubes;
 			}
 		}
 	}
