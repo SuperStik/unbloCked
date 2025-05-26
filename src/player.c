@@ -7,19 +7,27 @@
 #include "level/level.h"
 #include "player.h"
 
-static void resetpos(struct UBLC_player *ply);
-static void setpos(struct UBLC_player *ply, float x, float y, float z);
+static void resetpos(struct UBLC_player *);
+static void setpos(struct UBLC_player *, float x, float y, float z);
+
+static int setonground(struct UBLC_player *, int onground);
+static int isonground(struct UBLC_player *);
+
+static int sethasreset(struct UBLC_player *, int reset);
+static int gethasreset(struct UBLC_player *);
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
 	pthread_rwlock_init(&(ply->lock), NULL);
+	pthread_rwlock_wrlock(&(ply->lock));
 
-	ply->onground = 0;
-	ply->gravity = 1;
-	ply->hasreset = 0;
+	ply->flags = UBLC_FPLY_FLYING;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 
 	resetpos(ply);
+
+	pthread_rwlock_unlock(&(ply->lock));
+
 	return ply;
 }
 
@@ -37,6 +45,56 @@ int UBLC_player_unsetkeys(struct UBLC_player *ply, int keys) {
 
 int UBLC_player_getkeys(const struct UBLC_player *ply) {
 	return __atomic_load_n(&(ply->keyflags), __ATOMIC_RELAXED);
+}
+
+int UBLC_player_setflying(struct UBLC_player *ply, int flying) {
+	if (flying) {
+		return !!(__atomic_fetch_or(&(ply->flags), UBLC_FPLY_FLYING,
+					__ATOMIC_RELAXED) & UBLC_FPLY_FLYING);
+	} else {
+		return !!(__atomic_fetch_and(&(ply->flags), ~UBLC_FPLY_FLYING,
+					__ATOMIC_RELAXED) & UBLC_FPLY_FLYING);
+	}
+}
+
+int UBLC_player_toggleflying(struct UBLC_player *ply) {
+	return !!(__atomic_fetch_xor(&(ply->flags), UBLC_FPLY_FLYING,
+				__ATOMIC_RELAXED) & UBLC_FPLY_FLYING);
+}
+
+int UBLC_player_getflying(const struct UBLC_player *ply) {
+	return !!(__atomic_load_n(&(ply->flags), __ATOMIC_RELAXED) &
+			UBLC_FPLY_FLYING);
+}
+
+static int setonground(struct UBLC_player *ply, int onground) {
+	if (onground) {
+		return __atomic_fetch_or(&(ply->flags), UBLC_FPLY_ONGROUND,
+				__ATOMIC_RELAXED) & UBLC_FPLY_ONGROUND;
+	} else {
+		return __atomic_fetch_and(&(ply->flags), ~UBLC_FPLY_ONGROUND,
+				__ATOMIC_RELAXED) & UBLC_FPLY_ONGROUND;
+	}
+}
+
+static int isonground(struct UBLC_player *ply) {
+	return __atomic_load_n(&(ply->flags), __ATOMIC_RELAXED) &
+		UBLC_FPLY_ONGROUND;
+}
+
+static int sethasreset(struct UBLC_player *ply, int reset) {
+	if (reset) {
+		return __atomic_fetch_or(&(ply->flags), UBLC_FPLY_HASRESET,
+				__ATOMIC_RELAXED) & UBLC_FPLY_HASRESET;
+	} else {
+		return __atomic_fetch_and(&(ply->flags), ~UBLC_FPLY_HASRESET,
+				__ATOMIC_RELAXED) & UBLC_FPLY_HASRESET;
+	}
+}
+
+static int gethasreset(struct UBLC_player *ply) {
+	return __atomic_load_n(&(ply->flags), __ATOMIC_RELAXED) &
+		UBLC_FPLY_HASRESET;
 }
 
 void UBLC_player_turn(struct UBLC_player *ply, float xo, float yo) {
@@ -71,11 +129,11 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 
 	int keys = UBLC_player_getkeys(ply);
 
-	if ((keys & UBLC_KF_R) && !ply->hasreset) {
+	if ((keys & UBLC_KF_R) && !gethasreset(ply)) {
 		resetpos(ply);
-		ply->hasreset = 1;
+		sethasreset(ply, 1);
 	} else if (!(keys & UBLC_KF_R))
-		ply->hasreset = 0;
+		sethasreset(ply, 0);
 
 	if (keys & (UBLC_KF_UP | UBLC_KF_W))
 		ya -= 1.0f;
@@ -89,18 +147,22 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	if (keys & (UBLC_KF_RIGHT | UBLC_KF_D))
 		xa += 1.0f;
 
-	if ((keys & UBLC_KF_SPACE) && ply->onground)
+	int grounded = isonground(ply);
+
+	if ((keys & UBLC_KF_SPACE) && grounded)
 		ply->yd = 0.12;
 
-	UBLC_player_moverelative(ply, xa, ya, ply->onground ? 0.02f : 0.005f);
-	if (ply->gravity)
+	UBLC_player_moverelative(ply, xa, ya, grounded ? 0.02f : 0.005f);
+
+	if (UBLC_player_getflying(ply))
 		ply->yd = (ply->yd - 0.005f);
+
 	UBLC_player_move(ply, ply->xd, ply->yd, ply->zd);
 	ply->xd *= 0.91f;
 	ply->yd *= 0.98f;
 	ply->zd *= 0.91f;
 	
-	if (ply->onground) {
+	if (grounded) {
 		ply->xd *= 0.8f;
 		ply->zd *= 0.8f;
 	}
@@ -124,7 +186,7 @@ void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 	}
 	UBLC_AABB_move(&(ply->aabb), xa, ya, za);
 
-	ply->onground = yaOrg != ya && yaOrg < 0.0f;
+	setonground(ply, yaOrg != ya && yaOrg < 0.0f);
 
 	if (xaOrg != xa)
 		ply->xd = 0.0f;

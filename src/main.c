@@ -347,7 +347,7 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 
 	switch(key->key) {
 		case SDLK_G:
-			player.gravity = !player.gravity;
+			UBLC_player_toggleflying(&player);
 			break;
 		case SDLK_L:;
 			bool relative = SDL_GetWindowRelativeMouseMode(window);

@@ -16,6 +16,10 @@
 #define UBLC_KF_SPACE (1 << 8)
 #define UBLC_KF_R (1 << 9)
 
+#define UBLC_FPLY_ONGROUND (1 << 0)
+#define UBLC_FPLY_FLYING (1 << 1)
+#define UBLC_FPLY_HASRESET (1 << 2)
+
 struct UBLC_player {
 	pthread_rwlock_t lock;
 	float xo;
@@ -31,9 +35,7 @@ struct UBLC_player {
 	float yaw;
 	struct UBLC_AABB aabb;
 	int keyflags;
-	unsigned char onground:1;
-	unsigned char gravity:1;
-	unsigned char hasreset:1;
+	char flags;
 };
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *);
@@ -42,6 +44,10 @@ void UBLC_player_delete(struct UBLC_player *);
 int UBLC_player_setkeys(struct UBLC_player *ply, int keys);
 int UBLC_player_unsetkeys(struct UBLC_player *ply, int keys);
 int UBLC_player_getkeys(const struct UBLC_player *ply);
+
+int UBLC_player_setflying(struct UBLC_player *ply, int flying);
+int UBLC_player_toggleflying(struct UBLC_player *ply);
+int UBLC_player_getflying(const struct UBLC_player *ply);
 
 void UBLC_player_turn(struct UBLC_player *, float xo, float yo);
 void UBLC_player_getangles(struct UBLC_player *ply, float *pitch, float *yaw);
