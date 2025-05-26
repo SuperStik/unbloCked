@@ -213,8 +213,12 @@ static int translatekey(SDL_Keycode key) {
 
 static void movecameratoplayer(float a) {
 	glTranslatef(0.0f, 0.0f, -0.3f);
-	glRotatef(player.pitch, 1.0f, 0.0f, 0.0f);
-	glRotatef(player.yaw, 0.0f, 1.0f, 0.0f);
+
+	float pitch, yaw;
+	UBLC_player_getangles(&player, &pitch, &yaw);
+
+	glRotatef(pitch, 1.0f, 0.0f, 0.0f);
+	glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 
 	float x = player.xo + (player.x - player.xo) * a;
 	float y = player.yo + (player.y - player.yo) * a;

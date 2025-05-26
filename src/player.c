@@ -40,6 +40,8 @@ int UBLC_player_getkeys(const struct UBLC_player *ply) {
 }
 
 void UBLC_player_turn(struct UBLC_player *ply, float xo, float yo) {
+	pthread_rwlock_wrlock(&(ply->lock));
+
 	ply->yaw = (ply->yaw + xo * 0.15f);
 	float newpitch = (ply->pitch + yo * 0.15f);
 
@@ -47,6 +49,17 @@ void UBLC_player_turn(struct UBLC_player *ply, float xo, float yo) {
 		ply->pitch = copysignf(90.0f, newpitch);
 	else
 		ply->pitch = newpitch;
+
+	pthread_rwlock_unlock(&(ply->lock));
+}
+
+void UBLC_player_getangles(struct UBLC_player *ply, float *pitch, float *yaw) {
+	pthread_rwlock_rdlock(&(ply->lock));
+
+	*pitch = ply->pitch;
+	*yaw = ply->yaw;
+
+	pthread_rwlock_unlock(&(ply->lock));
 }
 
 void UBLC_player_tick(struct UBLC_player *ply) {
@@ -91,8 +104,7 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 		ply->xd *= 0.8f;
 		ply->zd *= 0.8f;
 	}
-
-	}
+}
 
 void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 	float xaOrg = xa;

@@ -44,6 +44,8 @@ int UBLC_player_unsetkeys(struct UBLC_player *ply, int keys);
 int UBLC_player_getkeys(const struct UBLC_player *ply);
 
 void UBLC_player_turn(struct UBLC_player *, float xo, float yo);
+void UBLC_player_getangles(struct UBLC_player *ply, float *pitch, float *yaw);
+
 void UBLC_player_tick(struct UBLC_player *ply);
 void UBLC_player_move(struct UBLC_player *, float xa, float ya, float za);
 void UBLC_player_moverelative(struct UBLC_player *, float xa, float za, float
