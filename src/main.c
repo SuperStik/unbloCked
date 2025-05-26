@@ -25,6 +25,10 @@ static void *render(void *sem);
 static void *tick(void *_);
 
 static int translatekey(SDL_Keycode);
+static void movecameratoplayer(float a);
+static void frustum(float matrix[16], float left, float right, float bottom,
+		float top, float znear, float zfar);
+static void setupcamera(float a);
 
 static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
