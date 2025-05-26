@@ -79,13 +79,13 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(xlo, yhi, zlo, uhi, vlo, br, br,
+			UBLC_tesselator_vertex(xlo, yhi, zhi, ulo, vhi, br, br,
 					br);
-			UBLC_tesselator_vertex(xhi, yhi, zlo, ulo, vlo, br, br,
+			UBLC_tesselator_vertex(xlo, ylo, zhi, ulo, vlo, br, br,
 					br);
-			UBLC_tesselator_vertex(xhi, ylo, zlo, ulo, vhi, br, br,
+			UBLC_tesselator_vertex(xhi, ylo, zhi, uhi, vlo, br, br,
 					br);
-			UBLC_tesselator_vertex(xlo, ylo, zlo, uhi, vhi, br, br,
+			UBLC_tesselator_vertex(xhi, yhi, zhi, uhi, vhi, br, br,
 					br);
 		}
 	}
