@@ -357,6 +357,14 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 				SDL_WarpMouseInWindow(window, w, h);
 			}
 			break;
+		case SDLK_F11:
+			if (key->down) {
+				SDL_WindowFlags fl = (SDL_GetWindowFlags(
+							window));
+
+				bool fscreen = !(fl & SDL_WINDOW_FULLSCREEN);
+				SDL_SetWindowFullscreen(window, fscreen);
+			}
 		case SDLK_UP:
 		case SDLK_DOWN:
 		case SDLK_LEFT:
