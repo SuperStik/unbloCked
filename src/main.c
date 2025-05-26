@@ -204,6 +204,12 @@ static int translatekey(SDL_Keycode key) {
 		case SDLK_R:
 			plykey = UBLC_KF_R;
 			break;
+		case SDLK_LSHIFT:
+			plykey = UBLC_KF_LSHIFT;
+			break;
+		case SDLK_RSHIFT:
+			plykey = UBLC_KF_RSHIFT;
+			break;
 		default:
 			plykey = 0;
 	}
@@ -346,7 +352,7 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		goto keyevent_ret;
 
 	switch(key->key) {
-		case SDLK_G:
+		case SDLK_V:
 			UBLC_player_toggleflying(&player);
 			break;
 		case SDLK_L:;
@@ -379,7 +385,9 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		case SDLK_A:
 		case SDLK_D:
 		case SDLK_SPACE:
-		case SDLK_R:;
+		case SDLK_R:
+		case SDLK_LSHIFT:
+		case SDLK_RSHIFT:;
 			int plykey = translatekey(key->key);
 			if (key->down)
 				UBLC_player_setkeys(&player, plykey);
@@ -400,7 +408,9 @@ static void keyevent_up_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		case SDLK_A:
 		case SDLK_D:
 		case SDLK_SPACE:
-		case SDLK_R:;
+		case SDLK_R:
+		case SDLK_LSHIFT:
+		case SDLK_RSHIFT:;
 			    int plykey = translatekey(key->key);
 			    UBLC_player_unsetkeys(&player, plykey);
 			    break;

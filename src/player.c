@@ -20,7 +20,7 @@ struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
 	pthread_rwlock_init(&(ply->lock), NULL);
 	pthread_rwlock_wrlock(&(ply->lock));
 
-	ply->flags = UBLC_FPLY_FLYING;
+	ply->flags = 0;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 
@@ -126,6 +126,7 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	ply->zo = ply->z;
 	float xa = 0.0f;
 	float ya = 0.0f;
+	float za = 0.0f;
 
 	int keys = UBLC_player_getkeys(ply);
 
@@ -136,10 +137,10 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 		sethasreset(ply, 0);
 
 	if (keys & (UBLC_KF_UP | UBLC_KF_W))
-		ya -= 1.0f;
+		za -= 1.0f;
 
 	if (keys & (UBLC_KF_DOWN | UBLC_KF_S))
-		ya += 1.0f;
+		za += 1.0f;
 
 	if (keys & (UBLC_KF_LEFT | UBLC_KF_A))
 		xa -= 1.0f;
@@ -148,13 +149,24 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 		xa += 1.0f;
 
 	int grounded = isonground(ply);
+	int flying = UBLC_player_getflying(ply);
 
-	if ((keys & UBLC_KF_SPACE) && grounded)
-		ply->yd = 0.12;
+	if (keys & UBLC_KF_SPACE) {
+		if (grounded)
+			ply->yd = 0.12;
 
-	UBLC_player_moverelative(ply, xa, ya, grounded ? 0.02f : 0.005f);
+		if (flying)
+			ya += 0.012;
+	}
 
-	if (UBLC_player_getflying(ply))
+	if ((keys & (UBLC_KF_LSHIFT | UBLC_KF_RSHIFT)) && flying)
+		ya -= 0.012;
+
+	ply->yd += ya;
+
+	UBLC_player_moverelative(ply, xa, za, grounded ? 0.02f : 0.005f);
+
+	if (!flying)
 		ply->yd = (ply->yd - 0.005f);
 
 	UBLC_player_move(ply, ply->xd, ply->yd, ply->zd);
@@ -165,6 +177,10 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	if (grounded) {
 		ply->xd *= 0.8f;
 		ply->zd *= 0.8f;
+	}
+
+	if (flying) {
+		ply->yd *= 0.8f;
 	}
 }
 
@@ -206,7 +222,7 @@ void UBLC_player_moverelative(struct UBLC_player *ply, float xa, float za, float
 		speed) {
 	float dist = (xa * xa) + (za * za);
 	
-	if (dist < 0.01f)
+	if (dist < 0.1f)
 		return;
 
 	dist = speed / sqrtf(dist);

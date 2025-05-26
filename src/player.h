@@ -15,6 +15,8 @@
 #define UBLC_KF_D (1 << 7)
 #define UBLC_KF_SPACE (1 << 8)
 #define UBLC_KF_R (1 << 9)
+#define UBLC_KF_LSHIFT (1 << 10)
+#define UBLC_KF_RSHIFT (1 << 11)
 
 #define UBLC_FPLY_ONGROUND (1 << 0)
 #define UBLC_FPLY_FLYING (1 << 1)
