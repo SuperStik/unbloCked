@@ -106,6 +106,11 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 		return -1;
 	}
 
+	png_set_palette_to_rgb(png_reader);
+
+	png_init_io(png_reader, infile);
+	png_set_sig_bytes(png_reader, 8);
+
 	png_infop png_info = png_create_info_struct(png_reader);
 	if (png_info == NULL) {
 		warnx("libpng: Can't create info", NULL);
@@ -113,15 +118,14 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 		return -1;
 	}
 
+	png_read_info(png_reader, png_info);
+
 	if (setjmp(png_jmpbuf(png_reader))) {
 		warnx("libpng: Weird error");
+		png_read_end(png_reader, png_info);
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
-
-	png_init_io(png_reader, infile);
-	png_set_sig_bytes(png_reader, 8);
-	png_read_info(png_reader, png_info);
 
 	int bit_depth, color_type;
 	png_uint_32 w, h;
@@ -130,21 +134,20 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	*width = w;
 	*height = h;
 
-	if (color_type & PNG_COLOR_MASK_PALETTE)
-		png_set_palette_to_rgb(png_reader);
-
 	*internalformat = typepng2gl(bit_depth, color_type, format);
 
 	if (setjmp(png_jmpbuf(png_reader))) {
 		warnx("libpng: Another weird error");
+		png_read_end(png_reader, png_info);
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
 
 	size_t rowbytes = png_get_rowbytes(png_reader, png_info);
-	*image = malloc((*height) * sizeof(png_bytep) * rowbytes);
+	*image = malloc((*height) * sizeof(png_bytep) * rowbytes * 3);
 	if (*image == NULL) {
 		warn("malloc", NULL);
+		png_read_end(png_reader, png_info);
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
@@ -153,12 +156,13 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	if (rows == NULL) {
 		free(*image);
 		*image = NULL;
+		png_read_end(png_reader, png_info);
 		png_destroy_read_struct(&png_reader, &png_info, NULL);
 		return -1;
 	}
 
 	for (long i = 0; i < *height; ++i)
-		rows[i] = &((*image)[i * (*width)]);
+		rows[i] = &((*image)[i * rowbytes * 3]);
 
 	png_read_image(png_reader, rows);
 
