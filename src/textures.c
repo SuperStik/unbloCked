@@ -144,7 +144,11 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	}
 
 	size_t rowbytes = png_get_rowbytes(png_reader, png_info);
-	*image = malloc((*height) * sizeof(png_bytep) * rowbytes * 3);
+
+	if (color_type == PNG_COLOR_TYPE_PALETTE)
+		rowbytes *= 3;
+
+	*image = malloc((*height) * sizeof(png_bytep) * rowbytes);
 	if (*image == NULL) {
 		warn("malloc", NULL);
 		png_read_end(png_reader, png_info);
@@ -162,7 +166,7 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	}
 
 	for (long i = 0; i < *height; ++i)
-		rows[i] = &((*image)[i * rowbytes * 3]);
+		rows[i] = &((*image)[i * rowbytes]);
 
 	png_read_image(png_reader, rows);
 
