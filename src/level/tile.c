@@ -40,24 +40,24 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 	}
 
 	if (!UBLC_level_issolid(x, y + 1, z)) {
-		br = UBLC_level_getbrightness(x, y + 1, z) * frnt;
+		br = UBLC_level_getbrightness(x, y + 1, z) * side;
 		if ((br == frnt) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(xhi, yhi, zhi, ulo, vhi, br, br,
+			UBLC_tesselator_vertex(xhi, yhi, zhi, uhi, vhi, br, br,
 					br);
-			UBLC_tesselator_vertex(xhi, yhi, zlo, ulo, vlo, br, br,
+			UBLC_tesselator_vertex(xhi, yhi, zlo, uhi, vlo, br, br,
 					br);
-			UBLC_tesselator_vertex(xlo, yhi, zlo, uhi, vlo, br, br,
+			UBLC_tesselator_vertex(xlo, yhi, zlo, ulo, vlo, br, br,
 					br);
-			UBLC_tesselator_vertex(xlo, yhi, zhi, uhi, vhi, br, br,
+			UBLC_tesselator_vertex(xlo, yhi, zhi, ulo, vhi, br, br,
 					br);
 		}
 	}
 
 	if (!UBLC_level_issolid(x, y, z - 1)) {
-		br = UBLC_level_getbrightness(x, y, z - 1) * side;
+		br = UBLC_level_getbrightness(x, y, z - 1) * frnt;
 		if ((br == side) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
@@ -74,7 +74,7 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 	}
 
 	if (!UBLC_level_issolid(x, y, z + 1)) {
-		br = UBLC_level_getbrightness(x, y, z + 1) * side;
+		br = UBLC_level_getbrightness(x, y, z + 1) * frnt;
 		if ((br == side) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
