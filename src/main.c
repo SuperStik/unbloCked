@@ -296,17 +296,18 @@ static void *render(void *i) {
 
 		glEnable(GL_CULL_FACE);
 
+		glEnable(GL_POLYGON_SMOOTH);
+
 		glEnable(GL_FOG);
 		glFogi(GL_FOG_MODE, GL_EXP);
 		glFogf(GL_FOG_DENSITY, 0.2f);
 		glFogfv(GL_FOG_COLOR, fogcolor);
-
+		UBLC_levelrenderer_render(&player, 1);
 		glDisable(GL_FOG);
 		UBLC_levelrenderer_render(&player, 0);
-		glEnable(GL_FOG);
-		UBLC_levelrenderer_render(&player, 1);
 		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_FOG);
+
+		glDisable(GL_POLYGON_SMOOTH);
 
 		SDL_Event event;
 		event.type = SDL_EVENT_USER;
