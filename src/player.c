@@ -11,13 +11,32 @@ static void resetpos(struct UBLC_player *ply);
 static void setpos(struct UBLC_player *ply, float x, float y, float z);
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
+	pthread_rwlock_init(&(ply->lock), NULL);
+
 	ply->onground = 0;
 	ply->gravity = 1;
+	ply->hasreset = 0;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 
 	resetpos(ply);
 	return ply;
+}
+
+void UBLC_player_delete(struct UBLC_player *ply) {
+	pthread_rwlock_destroy(&(ply->lock));
+}
+
+int UBLC_player_setkeys(struct UBLC_player *ply, int keys) {
+	return __atomic_fetch_or(&(ply->keyflags), keys, __ATOMIC_RELAXED);
+}
+
+int UBLC_player_unsetkeys(struct UBLC_player *ply, int keys) {
+	return __atomic_fetch_and(&(ply->keyflags), ~keys, __ATOMIC_RELAXED);
+}
+
+int UBLC_player_getkeys(const struct UBLC_player *ply) {
+	return __atomic_load_n(&(ply->keyflags), __ATOMIC_RELAXED);
 }
 
 void UBLC_player_turn(struct UBLC_player *ply, float xo, float yo) {
@@ -37,6 +56,29 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	float xa = 0.0f;
 	float ya = 0.0f;
 
+	int keys = UBLC_player_getkeys(ply);
+
+	if ((keys & UBLC_KF_R) && !ply->hasreset) {
+		resetpos(ply);
+		ply->hasreset = 1;
+	} else if (!(keys & UBLC_KF_R))
+		ply->hasreset = 0;
+
+	if (keys & (UBLC_KF_UP | UBLC_KF_W))
+		ya -= 1.0f;
+
+	if (keys & (UBLC_KF_DOWN | UBLC_KF_S))
+		ya += 1.0f;
+
+	if (keys & (UBLC_KF_LEFT | UBLC_KF_A))
+		xa -= 1.0f;
+
+	if (keys & (UBLC_KF_RIGHT | UBLC_KF_D))
+		xa += 1.0f;
+
+	if ((keys & UBLC_KF_SPACE) && ply->onground)
+		ply->yd = 0.12;
+
 	UBLC_player_moverelative(ply, xa, ya, ply->onground ? 0.02f : 0.005f);
 	if (ply->gravity)
 		ply->yd = (ply->yd - 0.005f);
@@ -49,7 +91,8 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 		ply->xd *= 0.8f;
 		ply->zd *= 0.8f;
 	}
-}
+
+	}
 
 void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 	float xaOrg = xa;
@@ -113,6 +156,9 @@ static void setpos(struct UBLC_player *ply, float x, float y, float z) {
 	ply->x = x;
 	ply->y = y;
 	ply->z = z;
+	ply->xd = 0.0f;
+	ply->yd = 0.0f;
+	ply->zd = 0.0f;
 	float w = 0.3f;
 	float h = 0.9f;
 	UBLC_AABB_INIT(&(ply->aabb), x - w, y - h, z - w, x + w, y + h, z + w);

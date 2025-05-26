@@ -1,9 +1,23 @@
 #ifndef PLAYER_H
 #define PLAYER_H 1
 
+#include <pthread.h>
+
 #include "phys/AABB.h"
 
+#define UBLC_KF_UP (1 << 0)
+#define UBLC_KF_DOWN (1 << 1)
+#define UBLC_KF_LEFT (1 << 2)
+#define UBLC_KF_RIGHT (1 << 3)
+#define UBLC_KF_W (1 << 4)
+#define UBLC_KF_S (1 << 5)
+#define UBLC_KF_A (1 << 6)
+#define UBLC_KF_D (1 << 7)
+#define UBLC_KF_SPACE (1 << 8)
+#define UBLC_KF_R (1 << 9)
+
 struct UBLC_player {
+	pthread_rwlock_t lock;
 	float xo;
 	float yo;
 	float zo;
@@ -16,11 +30,18 @@ struct UBLC_player {
 	float pitch;
 	float yaw;
 	struct UBLC_AABB aabb;
+	int keyflags;
 	unsigned char onground:1;
 	unsigned char gravity:1;
+	unsigned char hasreset:1;
 };
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *);
+void UBLC_player_delete(struct UBLC_player *);
+
+int UBLC_player_setkeys(struct UBLC_player *ply, int keys);
+int UBLC_player_unsetkeys(struct UBLC_player *ply, int keys);
+int UBLC_player_getkeys(const struct UBLC_player *ply);
 
 void UBLC_player_turn(struct UBLC_player *, float xo, float yo);
 void UBLC_player_tick(struct UBLC_player *ply);
