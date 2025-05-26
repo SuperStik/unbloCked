@@ -280,6 +280,13 @@ static void *render(void *i) {
 	SDL_GL_MakeCurrent(info->window, info->gl_context);
 	pthread_setname_np("unbloCked.renderthread");
 
+	SDL_Event event;
+	event.type = SDL_EVENT_USER;
+	event.user.windowID = -1;
+	event.user.code = swapwindow;
+	event.user.data1 = NULL;
+	event.user.data2 = NULL;
+
 	const float fogcolor[4] = {
 		(14.0f/255.0f),
 		(11.0f/255.0f),
@@ -315,13 +322,7 @@ static void *render(void *i) {
 
 		glDisable(GL_POLYGON_SMOOTH);
 
-		SDL_Event event;
-		event.type = SDL_EVENT_USER;
 		event.user.timestamp = SDL_GetTicks();
-		event.user.windowID = -1;
-		event.user.code = swapwindow;
-		event.user.data1 = NULL;
-		event.user.data2 = NULL;
 		SDL_PushEvent(&event);
 	}
 
