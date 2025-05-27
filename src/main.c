@@ -33,6 +33,7 @@ static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
 
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
+static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
 
 static uint32_t swapwindow;
 
@@ -129,6 +130,10 @@ int main(void) {
 					break;
 				case SDL_EVENT_MOUSE_MOTION:
 					mousemotionevent_handler(&event.motion,
+							window);
+					break;
+				case SDL_EVENT_MOUSE_BUTTON_DOWN:
+					mousedown_handler(&event.button,
 							window);
 					break;
 				case SDL_EVENT_USER:
@@ -399,4 +404,71 @@ static void keyevent_up_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 static void mousemotionevent_handler(SDL_MouseMotionEvent *motion,
 		SDL_Window *window) {
 	UBLC_player_turn(&player, motion->xrel, motion->yrel);
+}
+
+static void mousedown_handler(SDL_MouseButtonEvent *button, SDL_Window *window)
+{
+	unsigned x, y, z, f;
+	switch(button->button) {
+		case SDL_BUTTON_LEFT:
+			pthread_rwlock_rdlock(&(player.lock));
+
+			if (!player.hasselect) {
+				pthread_rwlock_unlock(&(player.lock));
+				return;
+			}
+
+			x = player.xb;
+			y = player.yb;
+			z = player.zb;
+
+			pthread_rwlock_unlock(&(player.lock));
+
+			UBLC_level_settile(x, y, z, 0);
+
+			break;
+		case SDL_BUTTON_RIGHT:
+			pthread_rwlock_rdlock(&(player.lock));
+
+			if (!player.hasselect) {
+				pthread_rwlock_unlock(&(player.lock));
+				return;
+			}
+
+			x = player.xb;
+			y = player.yb;
+			z = player.zb;
+			f = player.placeface;
+
+			pthread_rwlock_unlock(&(player.lock));
+
+			switch(f) {
+				case 0:
+					--y;
+					break;
+				case 1:
+					++y;
+					break;
+				case 2:
+					--z;
+					break;
+				case 3:
+					++z;
+					break;
+				case 4:
+					--x;
+					break;
+				case 5:
+					++x;
+					break;
+			}
+
+			if (x >= UBLC_level_width || y >= UBLC_level_depth || z
+					>= UBLC_level_height)
+				return;
+
+			UBLC_level_settile(x, y, z, 1);
+
+			break;
+	}
 }

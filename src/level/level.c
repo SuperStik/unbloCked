@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include "level.h"
+#include "levelrenderer.h"
 
 unsigned UBLC_level_width;
 unsigned UBLC_level_height;
@@ -180,6 +181,8 @@ void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type) {
 		return;
 
 	blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] = type;
+
+	UBLC_levelrenderer_setdirty(x, y, z);
 }
 
 struct UBLC_hitresult *UBLC_level_clip(struct UBLC_hitresult *hit, float

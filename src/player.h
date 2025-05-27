@@ -19,10 +19,6 @@
 #define UBLC_KF_RSHIFT (1 << 11)
 #define UBLC_KF_V (1 << 12)
 
-#define UBLC_FPLY_ONGROUND (1 << 0)
-#define UBLC_FPLY_FLYING (1 << 1)
-#define UBLC_FPLY_HASRESET (1 << 2)
-
 struct UBLC_player {
 	pthread_rwlock_t lock;
 	float xo;

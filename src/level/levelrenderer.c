@@ -141,52 +141,73 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	glFlush();
 }
 
-void UBLC_levelrenderer_pick(struct UBLC_player *player) {
-	float r = 1.0f;
-	struct UBLC_AABB box = player->aabb;
-	UBLC_AABB_grow(&box, r, r, r);
-	int xlo = (int)box.x_lo;
-	int xhi = (int)(box.x_hi + 1.0f);
-	int ylo = (int)box.y_lo;
-	int yhi = (int)(box.y_hi + 1.0f);
-	int zlo = (int)box.z_lo;
-	int zhi = (int)(box.z_hi + 1.0f);
-	glInitNames();
-
-	//warnx("%i %i %i %i %i %i", xlo, xhi, ylo, yhi, zlo, zhi);
-
-	for (int x = xlo; x < xhi; ++x) {
-		glPushName(x);
-
-		for (int y = ylo; y < yhi; ++y) {
-			glPushName(y);
-
-			for (int z = zlo; z < zhi; ++z) {
-				glPushName(z);
-
-				if (!UBLC_level_issolid(x, y, z)) {
-					glPopName();
-					continue;
-				}
-
-				glPushName(0);
-
-				for (int i = 0; i < 6; ++i) {
-					glPushName(i);
-
-					UBLC_tesselator_init();
-					UBLC_tile_renderface(x, y, z, i);
-					UBLC_tesselator_flush();
-
-					glPopName();
-				}
-
-				glPopName();
-			}
-
-			glPopName();
-		}
-
-		glPopName();
+void UBLC_levelrenderer_setdirtyrange(unsigned xlo, unsigned ylo, unsigned zlo,
+		unsigned xhi, unsigned yhi, unsigned zhi) {
+	if (xlo > xhi) {
+		unsigned temp = xhi;
+		xhi = xlo;
+		xlo = temp;
 	}
+
+	if (ylo > yhi) {
+		unsigned temp = yhi;
+		yhi = ylo;
+		ylo = temp;
+	}
+
+	if (zlo > zhi) {
+		unsigned temp = zhi;
+		zhi = zlo;
+		zlo = temp;
+	}
+
+	xlo /= 16u;
+	ylo /= 16u;
+	zlo /= 16u;
+	xhi /= 16u;
+	yhi /= 16u;
+	zhi /= 16u;
+
+	if (xhi >= xchunks)
+		xhi = xchunks - 1;
+
+	if (yhi >= ychunks)
+		yhi = ychunks - 1;
+
+	if (zhi >= zchunks)
+		zhi = zchunks - 1;
+
+	for (unsigned x = xlo; x <= xhi; ++x) {
+		for (unsigned y = ylo; y <= yhi; ++y) {
+			for (unsigned z = zlo; z <= zhi; ++z) {
+				UBLC_chunk_setdirty(&(chunks[(x + y * xchunks) *
+							zchunks + z]));
+			}
+		}
+	}
+}
+
+void UBLC_levelrenderer_setdirty(unsigned x, unsigned y, unsigned z) {
+	unsigned xlo, ylo, zlo, xhi, yhi, zhi;
+
+	if (x != 0)
+		xlo = x - 1;
+	else
+		xlo = 0;
+
+	if (y != 0)
+		ylo = y - 1;
+	else
+		ylo = 0;
+
+	if (z != 0)
+		zlo = z - 1;
+	else
+		zlo = 0;
+
+	xhi = x + 1;
+	yhi = y + 1;
+	zhi = z + 1;
+
+	UBLC_levelrenderer_setdirtyrange(xlo, ylo, zlo, xhi, yhi, zhi);
 }

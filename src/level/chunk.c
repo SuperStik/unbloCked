@@ -1,4 +1,4 @@
-#include <OpenGL/gl.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "chunk.h"
 #include "level.h"
@@ -16,14 +16,13 @@ void UBLC_chunk_initstatic(void) {
 	texture = UBLC_textures_loadtexture("textures/terrain.png", GL_NEAREST);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
+	pthread_mutex_lock(&(chunk->lock));
 	if (chunk->_dirty) {
 		rebuild(chunk, 0);
 		rebuild(chunk, 1);
 	}
+	pthread_mutex_unlock(&(chunk->lock));
 
 	glCallList(chunk->_lists + layer);
 }
@@ -40,11 +39,14 @@ struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 	chunk->z_hi = z_hi;
 	chunk->_lists = glGenLists(2);
 	chunk->_dirty = 1;
+	pthread_mutex_init(&(chunk->lock), NULL);
+
 	return chunk;
 }
 
 void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
 	glDeleteLists(chunk->_lists, 2);
+	pthread_mutex_destroy(&(chunk->lock));
 }
 
 static void rebuild(struct UBLC_chunk *chunk, int layer) {
@@ -79,8 +81,10 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 	glEndList();
 }
 
-#pragma GCC diagnostic pop
-
 void UBLC_chunk_setdirty(struct UBLC_chunk *chunk) {
+	pthread_mutex_lock(&(chunk->lock));
+
 	chunk->_dirty = 1;
+
+	pthread_mutex_unlock(&(chunk->lock));
 }

@@ -1,9 +1,12 @@
 #ifndef UBLC_LEVEL_CHUNK_H
 #define UBLC_LEVEL_CHUNK_H 1
 
+#include <pthread.h>
+
 #include <phys/AABB.h>
 
 struct UBLC_chunk {
+	pthread_mutex_t lock;
 	struct UBLC_AABB aabb;
 	unsigned x_lo;
 	unsigned y_lo;
