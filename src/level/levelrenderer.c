@@ -82,6 +82,9 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 			UBLC_chunk_render(chunks + i, layer);
 	}
 
+	if (layer)
+		return;
+
 	float xlo, ylo, zlo, xhi, yhi, zhi;
 
 	gvec(float,4) offsetp;
