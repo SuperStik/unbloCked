@@ -284,8 +284,6 @@ static void perspective(float fovy, float aspect, float zNear, float zFar) {
 
 static void setupcamera(float a) {
 	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
 	perspective(90.0f, winsize.w / winsize.h, 0.05f, 1000.0f);
 
 	glMatrixMode(GL_MODELVIEW);
