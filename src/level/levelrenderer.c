@@ -83,16 +83,45 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 		return;
 
 	int xlo, ylo, zlo, xhi, yhi, zhi;
+	char selected, facing;
 	pthread_rwlock_rdlock(&(player->lock));
 	xlo = player->xb;
 	ylo = player->yb;
 	zlo = player->zb;
+	selected = player->hasselect;
+	facing = player->placeface;
 	pthread_rwlock_unlock(&(player->lock));
+
+	if (!selected)
+		return;
+
 	xhi = xlo + 1;
 	yhi = ylo + 1;
 	zhi = zlo + 1;
-	//warnx("%i %i %i %g %g %g", x, y, z, player->x, player->y, player->z);
-	glPointSize(5.0f);
+
+	int place[3] = {xlo, ylo, zlo};
+
+	switch (facing) {
+		case 0:
+			--(place[1]);
+			break;
+		case 1:
+			++(place[1]);
+			break;
+		case 2:
+			--(place[2]);
+			break;
+		case 3:
+			++(place[2]);
+			break;
+		case 4:
+			--(place[0]);
+			break;
+		case 5:
+			++(place[0]);
+			break;
+	}
+
 	glLineWidth(40.0f);
 
 	glBegin(GL_LINES);
@@ -102,12 +131,14 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	glVertex3i(xhi, yhi, zhi);
 	glEnd();
 
-	/*glBegin(GL_LINES);
+	glBegin(GL_LINES);
 	glColor3f(0.0f, 1.0f, 0.5f);
-	glVertex3f(floor(offsets[0]), floor(offsets[1]), floor(offsets[2]));
+	glVertex3iv(place);
 	glColor3f(0.0f, 0.5f, 1.0f);
-	glVertex3f(ceil(offsets[0]), ceil(offsets[1]), ceil(offsets[2]));
-	glEnd();*/
+	glVertex3i(place[0] + 1, place[1] + 1, place[2] + 1);
+	glEnd();
+
+	glFlush();
 }
 
 void UBLC_levelrenderer_pick(struct UBLC_player *player) {

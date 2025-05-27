@@ -78,21 +78,24 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	__sincospif(ply->yaw / 180.0f, &ysin, &ycos);
 
 	gvec(float,4) offset = {pcos * ysin, psin, -ycos * pcos, 0.0f};
+	offset *= 3.0f;
+	offset += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};
 
-	gvec(float,4) offset3 = offset * 3.0f;
-	offset3 += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};
 	float start[3] = {ply->x, ply->y, ply->z};
-	float end[3] = {offset3[0], offset3[1], offset3[2]};
+	float end[3] = {offset[0], offset[1], offset[2]};
 
 	UBLC_level_clip(&hit, start, end);
 
+	pthread_rwlock_wrlock(&(ply->lock));
 	if (hit.hit) {
-		pthread_rwlock_wrlock(&(ply->lock));
 		ply->xb = hit.x;
 		ply->yb = hit.y;
 		ply->zb = hit.z;
-		pthread_rwlock_unlock(&(ply->lock));
-	}
+		ply->hasselect = 1;
+		ply->placeface = hit.f;
+	} else
+		ply->hasselect = 0;
+	pthread_rwlock_unlock(&(ply->lock));
 
 	ply->xo = ply->x;
 	ply->yo = ply->y;

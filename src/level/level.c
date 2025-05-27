@@ -1,5 +1,6 @@
 #include <err.h>
 #include <math.h>
+#include <pthread.h>
 #include <stdlib.h>
 
 #include "level.h"
@@ -10,6 +11,7 @@ unsigned UBLC_level_depth;
 
 static unsigned char *blocks;
 static unsigned *light_depths;
+static pthread_rwlock_t levellock = PTHREAD_RWLOCK_INITIALIZER;
 static struct UBLC_AABB *cubes;
 static size_t numcubes;
 
@@ -38,6 +40,8 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 		return -1;
 	}
 
+	pthread_rwlock_wrlock(&levellock);
+
 	for (unsigned x = 0; x < w; ++x) {
 		for (unsigned y = 0; y < d; ++y) {
 			for (unsigned z = 0; z < h; ++z) {
@@ -47,10 +51,14 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 		}
 	}
 
+	pthread_rwlock_unlock(&levellock);
+
 	return 0;
 }
 
 void UBLC_level_delete(void) {
+	pthread_rwlock_wrlock(&levellock);
+
 	free(blocks);
 	free(light_depths);
 	free(cubes);
@@ -58,6 +66,8 @@ void UBLC_level_delete(void) {
 	blocks = NULL;
 	light_depths = NULL;
 	cubes = NULL;
+
+	pthread_rwlock_unlock(&levellock);
 }
 
 void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
@@ -87,7 +97,12 @@ int UBLC_level_istile(unsigned x, unsigned y, unsigned z) {
 			UBLC_level_height)
 		return 0;
 
-	return blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] != 0;
+	int istile;
+	pthread_rwlock_rdlock(&levellock);
+	istile = blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] !=
+		0;
+	pthread_rwlock_unlock(&levellock);
+	return istile;
 }
 
 int UBLC_level_issolid(unsigned x, unsigned y, unsigned z) {

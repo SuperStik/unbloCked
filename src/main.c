@@ -276,7 +276,7 @@ static void *render(void *i) {
 
 	UBLC_levelrenderer_init();
 
-	glPolygonMode(GL_FRONT, GL_LINE);
+	/*glPolygonMode(GL_FRONT, GL_LINE);*/
 
 	while (!done) {
 		anon_sem_wait(swapsem);
