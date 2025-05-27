@@ -3,10 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+#include <SDL3/SDL_opengl.h>
 #include <png.h>
 
+#include "gutl.h"
 #include "hashmap.h"
 #include "resources.h"
 #include "textures.h"
@@ -29,9 +29,6 @@ __attribute__((constructor)) static void idmap_init(void) {
 __attribute__((destructor)) static void idmap_delete(void) {
 	HMAP_destroy(idmap);
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 long UBLC_textures_loadtexture(const char *resource, int mode) {
 	unsigned *id_p = HMAP_get(idmap, resource);
@@ -71,7 +68,7 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 			GL_UNSIGNED_BYTE, pixels);
 	GLenum glerr = glGetError();
 	if (glerr)
-		warnx("glTexImage2D: %s", gluErrorString(glerr));
+		warnx("glTexImage2D: %s", GUTL_errorstr(glerr));
 	/* glGenerateMipmap(GL_TEXTURE_2D); */
 
 	free(pixels);
@@ -86,8 +83,6 @@ void UBLC_textures_bind(unsigned id) {
 		lastid = id;
 	}
 }
-
-#pragma GCC diagnostic pop
 
 static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 		int *format, png_bytep *image) {

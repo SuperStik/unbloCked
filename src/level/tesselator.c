@@ -2,9 +2,9 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <OpenGL/gl.h>
-#include <OpenGL/glu.h>
+#include <SDL3/SDL_opengl.h>
 
+#include "../gutl.h"
 #include "tesselator.h"
 
 #define MAX_VERTICES 100000
@@ -22,9 +22,6 @@ static struct {
 } flags;
 
 static void clear(void);
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 void UBLC_tesselator_flush(void) {
 	glVertexPointer(3, GL_FLOAT, 0, vertexbuffer);
@@ -46,7 +43,7 @@ void UBLC_tesselator_flush(void) {
 	glDrawArrays(GL_QUADS, GL_POINTS, vertices);
 	GLenum glerr = glGetError();
 	if (glerr)
-		warnx("glDrawArrays: %s", gluErrorString(glerr));
+		warnx("glDrawArrays: %s", GUTL_errorstr(glerr));
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 
@@ -58,8 +55,6 @@ void UBLC_tesselator_flush(void) {
 
 	clear();
 }
-
-#pragma GCC diagnostic pop
 
 void UBLC_tesselator_init(void) {
 	clear();

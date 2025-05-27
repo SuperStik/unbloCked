@@ -10,6 +10,7 @@
 #include <SDL3/SDL_opengl.h>
 
 #include "anon_sem.h"
+#include "gutl.h"
 #include "level/chunk.h"
 #include "level/levelrenderer.h"
 #include "level/level.h"
@@ -26,9 +27,6 @@ static void *tick(void *_);
 
 static int translatekey(SDL_Keycode);
 static void movecameratoplayer(float a);
-static void frustum(float matrix[16], float left, float right, float bottom,
-		float top, float znear, float zfar);
-static void perspective(float fovy, float aspect, float zNear, float zFar);
 static void setupcamera(float a);
 
 static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
@@ -237,44 +235,12 @@ static void movecameratoplayer(float a) {
 	glTranslatef(-x, -y, -z);
 }
 
-static void frustum(float matrix[16], float left, float right, float bottom,
-		float top, float znear, float zfar) {
-	float temp, temp2, temp3, temp4;
-	temp = 2.0 * znear;
-	temp2 = right - left;
-	temp3 = top - bottom;
-	temp4 = zfar - znear;
-	matrix[0] = temp / temp2;
-	matrix[1] = 0.0f;
-	matrix[2] = 0.0f;
-	matrix[3] = 0.0f;
-	matrix[4] = 0.0f;
-	matrix[5] = temp / temp3;
-	matrix[6] = 0.0f;
-	matrix[7] = 0.0f;
-	matrix[8] = (right + left) / temp2;
-	matrix[9] = (top + bottom) / temp3;
-	matrix[10] = (-zfar - znear) / temp4;
-	matrix[11] = -1.0;
-	matrix[12] = 0.0f;
-	matrix[13] = 0.0f;
-	matrix[14] = (-temp * zfar) / temp4;
-	matrix[15] = 0.0f;
-}
-
-static void perspective(float fovy, float aspect, float zNear, float zFar) {
-	float ymax, xmax;
-	ymax = zNear * __tanpif(fovy / 360.0f);
-	xmax = ymax * aspect;
-
-	float matrix[16];
-	frustum(matrix, -xmax, xmax, -ymax, ymax, zNear, zFar);
-	glLoadMatrixf(matrix);
-}
-
 static void setupcamera(float a) {
 	glMatrixMode(GL_PROJECTION);
-	perspective(90.0f, winsize.w / winsize.h, 0.05f, 1000.0f);
+
+	float matrix[16];
+	GUTL_perspectivef(matrix, 90.0f, winsize.w / winsize.h, 0.05f, 1000.0f);
+	glLoadMatrixf(matrix);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
