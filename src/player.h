@@ -17,6 +17,7 @@
 #define UBLC_KF_R (1 << 9)
 #define UBLC_KF_LSHIFT (1 << 10)
 #define UBLC_KF_RSHIFT (1 << 11)
+#define UBLC_KF_V (1 << 12)
 
 #define UBLC_FPLY_ONGROUND (1 << 0)
 #define UBLC_FPLY_FLYING (1 << 1)
@@ -36,9 +37,10 @@ struct UBLC_player {
 	float yd;
 	float zd;
 
-	float xb;
-	float yb;
-	float zb;
+	unsigned xb;
+	unsigned yb;
+	unsigned zb;
+
 	float place;
 	float smash;
 
@@ -49,7 +51,10 @@ struct UBLC_player {
 
 	int keyflags;
 
-	char flags;
+	unsigned char onground:1;
+	unsigned char flying:1;
+	unsigned char hasreset:1;
+	unsigned char hasflighttoggle:1;
 };
 
 struct UBLC_player *UBLC_player_init(struct UBLC_player *);

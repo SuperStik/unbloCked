@@ -5,8 +5,7 @@ struct UBLC_hitresult {
 	unsigned x;
 	unsigned y;
 	unsigned z;
-	unsigned o;
-	unsigned f;
+	unsigned char f:3;
 	unsigned char hit:1;
 };
 

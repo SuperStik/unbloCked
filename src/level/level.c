@@ -166,3 +166,108 @@ void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type) {
 
 	blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] = type;
 }
+
+struct UBLC_hitresult *UBLC_level_clip(struct UBLC_hitresult *hit, float
+		vstart[3], float vend[3]) {
+	if (isnan(vstart[0]) || isnan(vstart[1]) || isnan(vstart[2])) {
+		hit->hit = 0;
+		return hit;
+	}
+	if (isnan(vend[0]) || isnan(vend[1]) || isnan(vend[2])) {
+		hit->hit = 0;
+		return hit;
+	}
+
+	unsigned ilo[3] = {
+		(unsigned)vstart[0],
+		(unsigned)vstart[1],
+		(unsigned)vstart[2]
+	};
+	unsigned ihi[3] = {
+		(unsigned)vend[0],
+		(unsigned)vend[1],
+		(unsigned)vend[2]
+	};
+
+	for (int i = 20; i >= 0; --i) {
+		if (!isfinite(vstart[0]) || !isfinite(vstart[1]) ||
+				!isfinite(vstart[2])) {
+			hit->hit = 0;
+			return hit;
+		}
+
+		if (ilo[0] == ihi[0] && ilo[1] == ihi[1] && ilo[2] == ihi[2]) {
+			hit->hit = 0;
+			return hit;
+		}
+
+		float a[3] = {INFINITY, INFINITY, INFINITY};
+
+		for (int j = 0; j < 3; ++j) {
+			if (ihi[j] > ilo[j])
+				a[j] = (float)ilo[j] + 1.0f;
+			else if (ihi[j] < ilo[j])
+				a[j] = (float)ilo[j];
+		}
+
+		float b[3] = {INFINITY, INFINITY, INFINITY};
+		float d[3] = {
+			vend[0] - vstart[0],
+			vend[1] - vstart[1],
+			vend[2] - vstart[2]
+		};
+
+		for (int j = 0; j < 3; ++j) {
+			if (isfinite(a[j]))
+				b[j] = (a[j] - vstart[j]) / d[j];
+		}
+
+		int c;
+		if (b[0] < b[1] && b[0] < b[2]) {
+			c = ihi[0] > ilo[0] ? 4 : 5;
+			vstart[0] = a[0];
+			vstart[1] += d[1] * b[0];
+			vstart[2] += d[2] * b[0];
+		} else if (b[1] < b[2]) {
+			c = ihi[1] > ilo[1] ? 0 : 1;
+			vstart[1] = a[1];
+			vstart[0] += d[0] * b[1];
+			vstart[2] += d[2] * b[1];
+		} else {
+			c = ihi[2] > ilo[2] ? 2 : 3;
+			vstart[2] = a[2];
+			vstart[0] += d[0] * b[2];
+			vstart[1] += d[1] * b[2];
+		}
+
+		for (int j = 0; j < 3; ++j) {
+			ilo[j] = (unsigned)vstart[j];
+		}
+
+		switch (c) {
+			case 5:
+				--(ilo[0]);
+				break;
+			case 1:
+				--(ilo[1]);
+				break;
+			case 3:
+				--(ilo[2]);
+				break;
+		}
+
+		int istile = UBLC_level_istile(ilo[0], ilo[1], ilo[2]);
+
+		if (istile) {
+			hit->x = ilo[0];
+			hit->y = ilo[1];
+			hit->z = ilo[2];
+			hit->f = c;
+			hit->hit = 1;
+			return hit;
+		}
+	}
+
+	hit->hit = 0;
+	return hit;
+}

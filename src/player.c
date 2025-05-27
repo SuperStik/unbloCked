@@ -11,17 +11,14 @@
 static void resetpos(struct UBLC_player *);
 static void setpos(struct UBLC_player *, float x, float y, float z);
 
-static int setonground(struct UBLC_player *, int onground);
-static int isonground(struct UBLC_player *);
-
-static int sethasreset(struct UBLC_player *, int reset);
-static int gethasreset(struct UBLC_player *);
-
 struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
 	pthread_rwlock_init(&(ply->lock), NULL);
 	pthread_rwlock_wrlock(&(ply->lock));
 
-	ply->flags = 0;
+	ply->onground = 0;
+	ply->flying = 0;
+	ply->hasreset = 0;
+	ply->hasflighttoggle = 0;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 
@@ -48,56 +45,6 @@ int UBLC_player_getkeys(const struct UBLC_player *ply) {
 	return __atomic_load_n(&(ply->keyflags), __ATOMIC_RELAXED);
 }
 
-int UBLC_player_setflying(struct UBLC_player *ply, int flying) {
-	if (flying) {
-		return !!(__atomic_fetch_or(&(ply->flags), UBLC_FPLY_FLYING,
-					__ATOMIC_RELAXED) & UBLC_FPLY_FLYING);
-	} else {
-		return !!(__atomic_fetch_and(&(ply->flags), ~UBLC_FPLY_FLYING,
-					__ATOMIC_RELAXED) & UBLC_FPLY_FLYING);
-	}
-}
-
-int UBLC_player_toggleflying(struct UBLC_player *ply) {
-	return !!(__atomic_fetch_xor(&(ply->flags), UBLC_FPLY_FLYING,
-				__ATOMIC_RELAXED) & UBLC_FPLY_FLYING);
-}
-
-int UBLC_player_getflying(const struct UBLC_player *ply) {
-	return !!(__atomic_load_n(&(ply->flags), __ATOMIC_RELAXED) &
-			UBLC_FPLY_FLYING);
-}
-
-static int setonground(struct UBLC_player *ply, int onground) {
-	if (onground) {
-		return __atomic_fetch_or(&(ply->flags), UBLC_FPLY_ONGROUND,
-				__ATOMIC_RELAXED) & UBLC_FPLY_ONGROUND;
-	} else {
-		return __atomic_fetch_and(&(ply->flags), ~UBLC_FPLY_ONGROUND,
-				__ATOMIC_RELAXED) & UBLC_FPLY_ONGROUND;
-	}
-}
-
-static int isonground(struct UBLC_player *ply) {
-	return __atomic_load_n(&(ply->flags), __ATOMIC_RELAXED) &
-		UBLC_FPLY_ONGROUND;
-}
-
-static int sethasreset(struct UBLC_player *ply, int reset) {
-	if (reset) {
-		return __atomic_fetch_or(&(ply->flags), UBLC_FPLY_HASRESET,
-				__ATOMIC_RELAXED) & UBLC_FPLY_HASRESET;
-	} else {
-		return __atomic_fetch_and(&(ply->flags), ~UBLC_FPLY_HASRESET,
-				__ATOMIC_RELAXED) & UBLC_FPLY_HASRESET;
-	}
-}
-
-static int gethasreset(struct UBLC_player *ply) {
-	return __atomic_load_n(&(ply->flags), __ATOMIC_RELAXED) &
-		UBLC_FPLY_HASRESET;
-}
-
 void UBLC_player_turn(struct UBLC_player *ply, float xo, float yo) {
 	pthread_rwlock_wrlock(&(ply->lock));
 
@@ -122,6 +69,8 @@ void UBLC_player_getangles(struct UBLC_player *ply, float *pitch, float *yaw) {
 }
 
 void UBLC_player_tick(struct UBLC_player *ply) {
+	struct UBLC_hitresult hit;
+
 	float psin, pcos;
 	float ysin, ycos;
 
@@ -130,27 +79,20 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 
 	gvec(float,4) offset = {pcos * ysin, psin, -ycos * pcos, 0.0f};
 
-	float dist = 0.0f;
-	for (; dist < 3.0f; dist += 1.0f) {
-		gvec(float,4) testoff = offset * dist;
-		testoff += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};
-		if (UBLC_level_istile(testoff[0], testoff[1], testoff[2]))
-			break;
-	}	
+	gvec(float,4) offset3 = offset * 3.0f;
+	offset3 += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};
+	float start[3] = {ply->x, ply->y, ply->z};
+	float end[3] = {offset3[0], offset3[1], offset3[2]};
 
-	float place = dist - 1.0f;
-	if (place < 0.0f)
-		place = 0.0f;
-	/*offset *= dist;
-	offset += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};*/
+	UBLC_level_clip(&hit, start, end);
 
-	pthread_rwlock_wrlock(&(ply->lock));
-	ply->xb = offset[0];
-	ply->yb = offset[1];
-	ply->zb = offset[2];
-	ply->place = place;
-	ply->smash = dist;
-	pthread_rwlock_unlock(&(ply->lock));
+	if (hit.hit) {
+		pthread_rwlock_wrlock(&(ply->lock));
+		ply->xb = hit.x;
+		ply->yb = hit.y;
+		ply->zb = hit.z;
+		pthread_rwlock_unlock(&(ply->lock));
+	}
 
 	ply->xo = ply->x;
 	ply->yo = ply->y;
@@ -161,11 +103,11 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 
 	int keys = UBLC_player_getkeys(ply);
 
-	if ((keys & UBLC_KF_R) && !gethasreset(ply)) {
+	if ((keys & UBLC_KF_R) && !ply->hasreset) {
 		resetpos(ply);
-		sethasreset(ply, 1);
+		ply->hasreset = 1;
 	} else if (!(keys & UBLC_KF_R))
-		sethasreset(ply, 0);
+		ply->hasreset = 0;
 
 	if (keys & (UBLC_KF_UP | UBLC_KF_W))
 		za -= 1.0f;
@@ -179,8 +121,14 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	if (keys & (UBLC_KF_RIGHT | UBLC_KF_D))
 		xa += 1.0f;
 
-	int grounded = isonground(ply);
-	int flying = UBLC_player_getflying(ply);
+	if ((keys & UBLC_KF_V) && !ply->hasflighttoggle) {
+		ply->flying = !ply->flying;
+		ply->hasflighttoggle = 1;
+	} else if (!(keys & UBLC_KF_V))
+		ply->hasflighttoggle = 0;
+
+	int grounded = ply->onground;
+	int flying = ply->flying;
 
 	if (keys & UBLC_KF_SPACE) {
 		if (grounded)
@@ -233,7 +181,7 @@ void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 	}
 	UBLC_AABB_move(&(ply->aabb), xa, ya, za);
 
-	setonground(ply, yaOrg != ya && yaOrg < 0.0f);
+	ply->onground = yaOrg != ya && yaOrg < 0.0f;
 
 	if (xaOrg != xa)
 		ply->xd = 0.0f;

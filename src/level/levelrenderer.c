@@ -82,38 +82,32 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	if (layer)
 		return;
 
-	float xlo, ylo, zlo, xhi, yhi, zhi;
-
-	gvec(float,4) offsetp;
-	gvec(float,4) offsets;
-
+	int xlo, ylo, zlo, xhi, yhi, zhi;
 	pthread_rwlock_rdlock(&(player->lock));
-	gvec(float,4) offset = {player->xb, player->yb, player->zb, 0.0f};
-	offsetp = offset * player->place;
-	gvec(float,4) pos = {player->x, player->y, player->z, 0.0f};
-	offsetp += pos;
-	offsets = offset * player->smash;
-	offsets += pos;
+	xlo = player->xb;
+	ylo = player->yb;
+	zlo = player->zb;
 	pthread_rwlock_unlock(&(player->lock));
-
+	xhi = xlo + 1;
+	yhi = ylo + 1;
+	zhi = zlo + 1;
 	//warnx("%i %i %i %g %g %g", x, y, z, player->x, player->y, player->z);
 	glPointSize(5.0f);
 	glLineWidth(40.0f);
 
 	glBegin(GL_LINES);
 	glColor3f(1.0f, 0.0f, 0.5f);
-	glVertex3f(floor(offsetp[0]), floor(offsetp[1]), floor(offsetp[2]));
+	glVertex3i(xlo, ylo, zlo);
 	glColor3f(0.5f, 0.0f, 1.0f);
-	glVertex3f(ceil(offsetp[0]), ceil(offsetp[1]), ceil(offsetp[2]));
+	glVertex3i(xhi, yhi, zhi);
 	glEnd();
 
-	glBegin(GL_LINES);
+	/*glBegin(GL_LINES);
 	glColor3f(0.0f, 1.0f, 0.5f);
 	glVertex3f(floor(offsets[0]), floor(offsets[1]), floor(offsets[2]));
 	glColor3f(0.0f, 0.5f, 1.0f);
 	glVertex3f(ceil(offsets[0]), ceil(offsets[1]), ceil(offsets[2]));
-	glEnd();
-	glFlush();
+	glEnd();*/
 }
 
 void UBLC_levelrenderer_pick(struct UBLC_player *player) {

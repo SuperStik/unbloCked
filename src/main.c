@@ -213,6 +213,9 @@ static int translatekey(SDL_Keycode key) {
 		case SDLK_RSHIFT:
 			plykey = UBLC_KF_RSHIFT;
 			break;
+		case SDLK_V:
+			plykey = UBLC_KF_V;
+			break;
 		default:
 			plykey = 0;
 	}
@@ -273,6 +276,8 @@ static void *render(void *i) {
 
 	UBLC_levelrenderer_init();
 
+	glPolygonMode(GL_FRONT, GL_LINE);
+
 	while (!done) {
 		anon_sem_wait(swapsem);
 
@@ -326,9 +331,6 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		goto keyevent_ret;
 
 	switch(key->key) {
-		case SDLK_V:
-			UBLC_player_toggleflying(&player);
-			break;
 		case SDLK_L:;
 			bool relative = SDL_GetWindowRelativeMouseMode(window);
 			if (!SDL_SetWindowRelativeMouseMode(window, !relative))
@@ -361,7 +363,8 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		case SDLK_SPACE:
 		case SDLK_R:
 		case SDLK_LSHIFT:
-		case SDLK_RSHIFT:;
+		case SDLK_RSHIFT:
+		case SDLK_V:;
 			int plykey = translatekey(key->key);
 			if (key->down)
 				UBLC_player_setkeys(&player, plykey);
@@ -384,7 +387,8 @@ static void keyevent_up_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		case SDLK_SPACE:
 		case SDLK_R:
 		case SDLK_LSHIFT:
-		case SDLK_RSHIFT:;
+		case SDLK_RSHIFT:
+		case SDLK_V:;
 			    int plykey = translatekey(key->key);
 			    UBLC_player_unsetkeys(&player, plykey);
 			    break;
