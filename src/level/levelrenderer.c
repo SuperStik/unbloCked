@@ -1,10 +1,12 @@
 #include <err.h>
+#include <math.h>
 #include <stdlib.h>
 
 #include <OpenGL/gl.h>
 
 #include "chunk.h"
 #include "frustum.h"
+#include "gccvec.h"
 #include "levelrenderer.h"
 #include "level.h"
 #include <phys/AABB.h>
@@ -62,6 +64,9 @@ void UBLC_levelrenderer_delete(void) {
 	chunks = NULL;
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	UBLC_chunk_rebuilt_this_frame = 0;
 
@@ -76,13 +81,43 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 					aabb.z_hi))
 			UBLC_chunk_render(chunks + i, layer);
 	}
+
+	float xlo, ylo, zlo, xhi, yhi, zhi;
+
+	gvec(float,4) offsetp;
+	gvec(float,4) offsets;
+
+	pthread_rwlock_rdlock(&(player->lock));
+	gvec(float,4) offset = {player->xb, player->yb, player->zb, 0.0f};
+	offsetp = offset * player->place;
+	gvec(float,4) pos = {player->x, player->y, player->z, 0.0f};
+	offsetp += pos;
+	offsets = offset * player->smash;
+	offsets += pos;
+	pthread_rwlock_unlock(&(player->lock));
+
+	//warnx("%i %i %i %g %g %g", x, y, z, player->x, player->y, player->z);
+	glPointSize(5.0f);
+	glLineWidth(40.0f);
+
+	glBegin(GL_LINES);
+	glColor3f(1.0f, 0.0f, 0.5f);
+	glVertex3f(floor(offsetp[0]), floor(offsetp[1]), floor(offsetp[2]));
+	glColor3f(0.5f, 0.0f, 1.0f);
+	glVertex3f(ceil(offsetp[0]), ceil(offsetp[1]), ceil(offsetp[2]));
+	glEnd();
+
+	glBegin(GL_LINES);
+	glColor3f(0.0f, 1.0f, 0.5f);
+	glVertex3f(floor(offsets[0]), floor(offsets[1]), floor(offsets[2]));
+	glColor3f(0.0f, 0.5f, 1.0f);
+	glVertex3f(ceil(offsets[0]), ceil(offsets[1]), ceil(offsets[2]));
+	glEnd();
+	glFlush();
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 void UBLC_levelrenderer_pick(struct UBLC_player *player) {
-	float r = 3.0f;
+	float r = 1.0f;
 	struct UBLC_AABB box = player->aabb;
 	UBLC_AABB_grow(&box, r, r, r);
 	int xlo = (int)box.x_lo;
@@ -92,6 +127,8 @@ void UBLC_levelrenderer_pick(struct UBLC_player *player) {
 	int zlo = (int)box.z_lo;
 	int zhi = (int)(box.z_hi + 1.0f);
 	glInitNames();
+
+	//warnx("%i %i %i %i %i %i", xlo, xhi, ylo, yhi, zlo, zhi);
 
 	for (int x = xlo; x < xhi; ++x) {
 		glPushName(x);
@@ -106,6 +143,8 @@ void UBLC_levelrenderer_pick(struct UBLC_player *player) {
 					glPopName();
 					continue;
 				}
+
+				glPushName(0);
 
 				for (int i = 0; i < 6; ++i) {
 					glPushName(i);

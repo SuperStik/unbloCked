@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include <OpenGL/gl.h>
@@ -10,6 +11,7 @@
 #include <SDL3/SDL.h>
 
 #include "anon_sem.h"
+#include "hitresult.h"
 #include "level/chunk.h"
 #include "level/levelrenderer.h"
 #include "level/level.h"
@@ -28,6 +30,7 @@ static int translatekey(SDL_Keycode);
 static void movecameratoplayer(float a);
 static void frustum(float matrix[16], float left, float right, float bottom,
 		float top, float znear, float zfar);
+static void perspective(float fovy, float aspect, float zNear, float zFar);
 static void setupcamera(float a);
 
 static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
@@ -37,7 +40,15 @@ static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 
 static uint32_t swapwindow;
 
-float aspect = 640.0f / 480.0f;
+static int viewportbuffer[16];
+/* TODO: remove giant buffer */
+static unsigned selectbuffer[2000];
+struct UBLC_hitresult hitresult;
+
+struct {
+	float w;
+	float h;
+} winsize = {640.0f, 480.0f};
 
 static char done = 0;
 
@@ -139,8 +150,8 @@ int main(void) {
 					}
 					break;
 				case SDL_EVENT_WINDOW_RESIZED:
-					aspect = (float)event.window.data1 /
-						(float)event.window.data2;
+					winsize.w = (float)event.window.data1;
+					winsize.h = (float)event.window.data2;
 			}
 		}
 	}
@@ -261,17 +272,21 @@ static void frustum(float matrix[16], float left, float right, float bottom,
 	matrix[15] = 0.0f;
 }
 
+static void perspective(float fovy, float aspect, float zNear, float zFar) {
+	float ymax, xmax;
+	ymax = zNear * __tanpif(fovy / 360.0f);
+	xmax = ymax * aspect;
+
+	float matrix[16];
+	frustum(matrix, -xmax, xmax, -ymax, ymax, zNear, zFar);
+	glLoadMatrixf(matrix);
+}
+
 static void setupcamera(float a) {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	float ymax, xmax;
-	ymax = 0.05 * __tanpif(90.0f / 360.0f);
-	xmax = ymax * aspect;
-
-	float matrix[16];
-	frustum(matrix, -xmax, xmax, -ymax, ymax, 0.05, 1000.0f);
-	glLoadMatrixf(matrix);
+	perspective(90.0f, winsize.w / winsize.h, 0.05f, 1000.0f);
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

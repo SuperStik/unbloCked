@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "gccvec.h"
 #include "level/level.h"
 #include "player.h"
 
@@ -121,6 +122,36 @@ void UBLC_player_getangles(struct UBLC_player *ply, float *pitch, float *yaw) {
 }
 
 void UBLC_player_tick(struct UBLC_player *ply) {
+	float psin, pcos;
+	float ysin, ycos;
+
+	__sincospif(ply->pitch / -180.0f, &psin, &pcos);
+	__sincospif(ply->yaw / 180.0f, &ysin, &ycos);
+
+	gvec(float,4) offset = {pcos * ysin, psin, -ycos * pcos, 0.0f};
+
+	float dist = 0.0f;
+	for (; dist < 3.0f; dist += 1.0f) {
+		gvec(float,4) testoff = offset * dist;
+		testoff += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};
+		if (UBLC_level_istile(testoff[0], testoff[1], testoff[2]))
+			break;
+	}	
+
+	float place = dist - 1.0f;
+	if (place < 0.0f)
+		place = 0.0f;
+	/*offset *= dist;
+	offset += (gvec(float,4)){ply->x, ply->y, ply->z, 0.0f};*/
+
+	pthread_rwlock_wrlock(&(ply->lock));
+	ply->xb = offset[0];
+	ply->yb = offset[1];
+	ply->zb = offset[2];
+	ply->place = place;
+	ply->smash = dist;
+	pthread_rwlock_unlock(&(ply->lock));
+
 	ply->xo = ply->x;
 	ply->yo = ply->y;
 	ply->zo = ply->z;

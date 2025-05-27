@@ -27,16 +27,28 @@ struct UBLC_player {
 	float xo;
 	float yo;
 	float zo;
+
 	float x;
 	float y;
 	float z;
+
 	float xd;
 	float yd;
 	float zd;
+
+	float xb;
+	float yb;
+	float zb;
+	float place;
+	float smash;
+
 	float pitch;
 	float yaw;
+
 	struct UBLC_AABB aabb;
+
 	int keyflags;
+
 	char flags;
 };
 

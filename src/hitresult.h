@@ -7,6 +7,7 @@ struct UBLC_hitresult {
 	unsigned z;
 	unsigned o;
 	unsigned f;
-}
+	unsigned char hit:1;
+};
 
 #endif /* HITRESULT_H */
