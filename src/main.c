@@ -11,7 +11,6 @@
 #include <SDL3/SDL.h>
 
 #include "anon_sem.h"
-#include "hitresult.h"
 #include "level/chunk.h"
 #include "level/levelrenderer.h"
 #include "level/level.h"
@@ -39,11 +38,6 @@ static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 
 static uint32_t swapwindow;
-
-static int viewportbuffer[16];
-/* TODO: remove giant buffer */
-static unsigned selectbuffer[2000];
-struct UBLC_hitresult hitresult;
 
 struct {
 	float w;
