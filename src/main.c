@@ -6,9 +6,8 @@
 #include <string.h>
 #include <time.h>
 
-#include <OpenGL/gl.h>
-
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "anon_sem.h"
 #include "level/chunk.h"
@@ -47,9 +46,6 @@ struct {
 static char done = 0;
 
 static struct UBLC_player player;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 int main(void) {
 	srand48(time(NULL));
@@ -434,5 +430,3 @@ static void mousemotionevent_handler(SDL_MouseMotionEvent *motion,
 		SDL_Window *window) {
 	UBLC_player_turn(&player, motion->xrel, motion->yrel);
 }
-
-#pragma GCC diagnostic pop

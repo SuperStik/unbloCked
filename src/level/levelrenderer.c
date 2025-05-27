@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include <OpenGL/gl.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "chunk.h"
 #include "frustum.h"
@@ -63,9 +63,6 @@ void UBLC_levelrenderer_delete(void) {
 	free(chunks);
 	chunks = NULL;
 }
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	UBLC_chunk_rebuilt_this_frame = 0;
@@ -168,5 +165,3 @@ void UBLC_levelrenderer_pick(struct UBLC_player *player) {
 		glPopName();
 	}
 }
-
-#pragma GCC diagnostic pop
