@@ -79,18 +79,6 @@ void UBLC_level_delete(void) {
 
 void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
 		unsigned zhi) {
-	if (xlo > xhi) {
-		unsigned temp = xhi;
-		xhi = xlo;
-		xlo = temp;
-	}
-
-	if (zlo > zhi) {
-		unsigned temp = zhi;
-		zhi = zlo;
-		zlo = temp;
-	}
-
 	if (xlo >= UBLC_level_width || zlo >= UBLC_level_height) {
 		warnx("bad light coordinates: <%u, %u>", xlo, zlo);
 		return;
