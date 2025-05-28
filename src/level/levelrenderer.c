@@ -1,5 +1,6 @@
 #include <err.h>
 #include <math.h>
+#include <pthread.h>
 #include <stdlib.h>
 
 #include <SDL3/SDL_opengl.h>
@@ -65,8 +66,6 @@ void UBLC_levelrenderer_delete(void) {
 }
 
 void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
-	UBLC_chunk_rebuilt_this_frame = 0;
-
 	gvec(float,4) frustum[6];
 	UBLC_frustum_get(frustum);
 
@@ -176,6 +175,9 @@ void UBLC_levelrenderer_setdirtyrange(unsigned xlo, unsigned ylo, unsigned zlo,
 
 	if (zhi >= zchunks)
 		zhi = zchunks - 1;
+
+	if (chunks == NULL)
+		errx(2, "no chunks yet");
 
 	for (unsigned x = xlo; x <= xhi; ++x) {
 		for (unsigned y = ylo; y <= yhi; ++y) {

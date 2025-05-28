@@ -22,8 +22,8 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 	float br;
 
 	/* my fingers hurt */
-	if (!UBLC_level_issolid(x, y - 1, z)) {
-		br = UBLC_level_getbrightness(x, y - 1, z) * side;
+	if (!UBLC_level_issolid_unsafe(x, y - 1, z)) {
+		br = UBLC_level_getbrightness_unsafe(x, y - 1, z) * side;
 		if ((br == side) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
@@ -39,9 +39,9 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 		}
 	}
 
-	if (!UBLC_level_issolid(x, y + 1, z)) {
-		br = UBLC_level_getbrightness(x, y + 1, z) * side;
-		if ((br == frnt) ^ (layer == 1)) {
+	if (!UBLC_level_issolid_unsafe(x, y + 1, z)) {
+		br = UBLC_level_getbrightness_unsafe(x, y + 1, z) * side;
+		if ((br == side) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
@@ -56,9 +56,9 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 		}
 	}
 
-	if (!UBLC_level_issolid(x, y, z - 1)) {
-		br = UBLC_level_getbrightness(x, y, z - 1) * frnt;
-		if ((br == side) ^ (layer == 1)) {
+	if (!UBLC_level_issolid_unsafe(x, y, z - 1)) {
+		br = UBLC_level_getbrightness_unsafe(x, y, z - 1) * frnt;
+		if ((br == frnt) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
@@ -73,9 +73,9 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 		}
 	}
 
-	if (!UBLC_level_issolid(x, y, z + 1)) {
-		br = UBLC_level_getbrightness(x, y, z + 1) * frnt;
-		if ((br == side) ^ (layer == 1)) {
+	if (!UBLC_level_issolid_unsafe(x, y, z + 1)) {
+		br = UBLC_level_getbrightness_unsafe(x, y, z + 1) * frnt;
+		if ((br == frnt) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
@@ -90,9 +90,9 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 		}
 	}
 
-	if (!UBLC_level_issolid(x - 1, y, z)) {
-		br = UBLC_level_getbrightness(x - 1, y, z) * botm;
-		if ((br == side) ^ (layer == 1)) {
+	if (!UBLC_level_issolid_unsafe(x - 1, y, z)) {
+		br = UBLC_level_getbrightness_unsafe(x - 1, y, z) * botm;
+		if ((br == botm) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
@@ -107,9 +107,9 @@ void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
 		}
 	}
 
-	if (!UBLC_level_issolid(x + 1, y, z)) {
-		br = UBLC_level_getbrightness(x + 1, y, z) * botm;
-		if ((br == side) ^ (layer == 1)) {
+	if (!UBLC_level_issolid_unsafe(x + 1, y, z)) {
+		br = UBLC_level_getbrightness_unsafe(x + 1, y, z) * botm;
+		if ((br == botm) ^ (layer == 1)) {
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 

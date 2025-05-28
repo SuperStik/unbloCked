@@ -1,3 +1,4 @@
+#include <err.h>
 #include <SDL3/SDL_opengl.h>
 
 #include "chunk.h"
@@ -7,7 +8,6 @@
 #include "tile.h"
 
 static long texture = -1;
-int UBLC_chunk_rebuilt_this_frame = 0;
 unsigned UBLC_chunk_updates = 0;
 
 static void rebuild(struct UBLC_chunk *, int layer);
@@ -21,6 +21,7 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	if (chunk->_dirty) {
 		rebuild(chunk, 0);
 		rebuild(chunk, 1);
+		chunk->_dirty = 0;
 	}
 	pthread_mutex_unlock(&(chunk->lock));
 
@@ -50,12 +51,7 @@ void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
 }
 
 static void rebuild(struct UBLC_chunk *chunk, int layer) {
-	if (UBLC_chunk_rebuilt_this_frame == 2)
-		return;
-
-	chunk->_dirty = 0;
 	++UBLC_chunk_updates;
-	++UBLC_chunk_rebuilt_this_frame;
 
 	glNewList(chunk->_lists + layer, GL_COMPILE);
 
@@ -64,10 +60,12 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 
 	UBLC_tesselator_init();
 
+	UBLC_level_rdlock();
+
 	for (unsigned x = chunk->x_lo; x < chunk->x_hi; ++x) {
 		for (unsigned y = chunk->y_lo; y < chunk->y_hi; ++y) {
 			for (unsigned z = chunk->z_lo; z < chunk->z_hi; ++z) {
-				if (!UBLC_level_istile(x, y, z))
+				if (!UBLC_level_istile_unsafe(x, y, z))
 					continue;
 
 				int tex = (y != ((UBLC_level_depth * 2) / 3));
@@ -76,14 +74,15 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 		}
 	}
 
+	UBLC_level_unlock();
+
 	UBLC_tesselator_flush();
 	glDisable(GL_TEXTURE_2D);
 	glEndList();
 }
 
 void UBLC_chunk_setdirty(struct UBLC_chunk *chunk) {
-	pthread_mutex_lock(&(chunk->lock));
-
+	pthread_mutex_trylock(&(chunk->lock));
 	chunk->_dirty = 1;
 
 	pthread_mutex_unlock(&(chunk->lock));

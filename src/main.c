@@ -98,6 +98,8 @@ int main(void) {
 	if (swapwindow == 0)
 		errx(2, "No user events left", NULL);
 
+	UBLC_chunk_initstatic();
+
 	if (UBLC_level_new(256, 256, 64))
 		return 2;
 
@@ -277,10 +279,6 @@ static void *render(void *i) {
 
 	UBLC_timer_init(60.0f);
 
-	UBLC_chunk_initstatic();
-
-	UBLC_levelrenderer_init();
-
 	/*glPolygonMode(GL_FRONT, GL_LINE);*/
 
 	while (!done) {
@@ -308,8 +306,6 @@ static void *render(void *i) {
 		event.user.timestamp = SDL_GetTicks();
 		SDL_PushEvent(&event);
 	}
-
-	UBLC_levelrenderer_delete();
 
 	return NULL;
 }
