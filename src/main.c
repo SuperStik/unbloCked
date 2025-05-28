@@ -274,7 +274,7 @@ static void *render(void *i) {
 	struct threadinfo *info = i;
 	anon_sem_t *swapsem = &(info->swapsem);
 	SDL_GL_MakeCurrent(info->window, info->gl_context);
-	pthread_setname_np("unbloCked.renderthread");
+	pthread_setname_np("unbloCked.render");
 
 	SDL_Event event;
 	event.type = SDL_EVENT_USER;
@@ -326,7 +326,7 @@ static void *render(void *i) {
 static void *tick(void *_) {
 	(void)_;
 
-	pthread_setname_np("unbloCked.tickthread");
+	pthread_setname_np("unbloCked.tick");
 
 	while (!done) {
 		struct timespec start;
@@ -348,6 +348,8 @@ static void *tick(void *_) {
 }
 
 static void *framerate(void *_) {
+	pthread_setname_np("unbloCked.fpscount");
+
 	while (!done) {
 		size_t fps;
 		size_t updates;
