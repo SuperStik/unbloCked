@@ -83,7 +83,7 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 }
 
 void UBLC_chunk_setdirty(struct UBLC_chunk *chunk) {
-	pthread_mutex_trylock(&(chunk->lock));
+	pthread_mutex_lock(&(chunk->lock));
 	chunk->_dirty = 1;
 
 	pthread_mutex_unlock(&(chunk->lock));
