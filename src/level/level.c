@@ -41,8 +41,6 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 		return -1;
 	}
 
-	UBLC_levelrenderer_init();
-
 	pthread_rwlock_wrlock(&levellock);
 
 	for (unsigned x = 0; x < w; ++x) {
@@ -57,6 +55,8 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 	UBLC_level_calclightdepths(0, 0, w, h);
 
 	pthread_rwlock_unlock(&levellock);
+
+	UBLC_levelrenderer_init();
 
 	return 0;
 }
@@ -90,19 +90,8 @@ void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
 	if ((zlo + zhi) >= UBLC_level_height)
 		zhi = (UBLC_level_height - 1) - zlo;
 
-	unsigned xrl = xlo;
-	unsigned yrl = UBLC_level_depth;
-	unsigned zrl = zlo;
-
-	unsigned xrh = xlo + xhi;
-	unsigned yrh = 0;
-	unsigned zrh = zlo + zhi;
-
 	for (unsigned x = xlo; x < xlo + xhi; ++x) {
 		for (unsigned z = zlo; z < zlo + zhi; ++z) {
-			unsigned olddepth = light_depths[x + z *
-				UBLC_level_width];
-
 			unsigned y;
 			for (y = UBLC_level_depth - 1; y > 0 &&
 					!UBLC_level_islightblocker_unsafe(x, y,
@@ -110,34 +99,8 @@ void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
 					--y);
 
 			light_depths[x + z * UBLC_level_width] = y;
-			if (olddepth == y) {
-				unsigned yl_lo = (olddepth < y) ? olddepth : y;
-				unsigned yl_hi = (olddepth > y) ? olddepth : y;
-
-				if (yl_lo < yrl)
-					yrl = yl_lo;
-
-				if (yl_hi > yrh)
-					yrh = yl_hi;
-
-			}
 		}
 	}
-
-	if (xrl != 0)
-		--xrl;
-
-	if (yrl != 0)
-		--yrl;
-
-	if (zrl != 0)
-		--zrl;
-
-	++xrh;
-	++yrh;
-	++zrh;
-
-	UBLC_levelrenderer_setdirtyrange(xrl, yrl, zrl, xrh, yrh, zrh);
 }
 
 int UBLC_level_istile(unsigned x, unsigned y, unsigned z) {
