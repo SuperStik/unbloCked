@@ -37,9 +37,11 @@ static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
 
-size_t frames = 0;
+static size_t frames = 0;
 
+static pthread_mutex_t interpmut = PTHREAD_MUTEX_INITIALIZER;
 static float a;
+
 static uint32_t swapwindow;
 
 struct {
@@ -245,9 +247,14 @@ static void movecameratoplayer(void) {
 	glRotatef(pitch, 1.0f, 0.0f, 0.0f);
 	glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 
+	pthread_mutex_lock(&interpmut);
+
 	float x = player.xo + (player.x - player.xo) * a;
 	float y = player.yo + (player.y - player.yo) * a;
 	float z = player.zo + (player.z - player.zo) * a;
+
+	pthread_mutex_unlock(&interpmut);
+
 	glTranslatef(-x, -y, -z);
 }
 
@@ -327,7 +334,14 @@ static void *tick(void *_) {
 
 		UBLC_player_tick(&player);
 
-		UBLC_chronos_sleeprate(&start, 60, &a);
+		float interp;
+		UBLC_chronos_sleeprate(&start, 60, &interp);
+
+		pthread_mutex_lock(&interpmut);
+
+		a = interp;
+
+		pthread_mutex_unlock(&interpmut);
 	}
 
 	return NULL;
