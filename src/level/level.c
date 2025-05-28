@@ -239,6 +239,9 @@ void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type) {
 
 	UBLC_level_unlock();
 
+	__builtin_prefetch(&(blocks[(y * UBLC_level_height + z) *
+				UBLC_level_width + x]), 0, 2);
+
 	UBLC_levelrenderer_setdirty(x, y, z);
 }
 
