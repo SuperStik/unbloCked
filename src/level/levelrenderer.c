@@ -4,6 +4,7 @@
 #include <stdlib.h>
 
 #include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL_timer.h>
 
 #include "chunk.h"
 #include "frustum.h"
@@ -121,21 +122,20 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 			break;
 	}
 
-	glLineWidth(40.0f);
+	UBLC_tesselator_settexture(0);
+	UBLC_tesselator_setcolor(0);
 
-	glBegin(GL_LINES);
-	glColor3f(1.0f, 0.0f, 0.5f);
-	glVertex3i(xlo, ylo, zlo);
-	glColor3f(0.5f, 0.0f, 1.0f);
-	glVertex3i(xhi, yhi, zhi);
-	glEnd();
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
-	glBegin(GL_LINES);
-	glColor3f(0.0f, 1.0f, 0.5f);
-	glVertex3iv(place);
-	glColor3f(0.0f, 0.5f, 1.0f);
-	glVertex3i(place[0] + 1, place[1] + 1, place[2] + 1);
-	glEnd();
+	glColor4d(1.0, 1.0, 1.0, sin((double)SDL_GetTicks() / 100.0) * 0.2 +
+			0.4);
+
+	UBLC_tile_renderface(xlo, ylo, zlo, facing);
+
+	UBLC_tesselator_flush();
+
+	glDisable(GL_BLEND);
 
 	glFlush();
 }

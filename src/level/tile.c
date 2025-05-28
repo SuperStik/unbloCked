@@ -135,27 +135,27 @@ void UBLC_tile_renderface(int x, int y, int z, enum UBLC_tile_face face) {
 	float zhi = (float)z + 1.0f;
 
 	switch (face) {
-		case UBLC_FACE_FRONT:
-			UBLC_tesselator_vertex(xlo, ylo, zhi, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			UBLC_tesselator_vertex(xlo, ylo, zlo, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			UBLC_tesselator_vertex(xhi, ylo, zlo, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			UBLC_tesselator_vertex(xhi, ylo, zhi, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			break;
-		case UBLC_FACE_BACK:
-			UBLC_tesselator_vertex(xhi, ylo, zhi, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			UBLC_tesselator_vertex(xhi, ylo, zlo, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			UBLC_tesselator_vertex(xlo, ylo, zlo, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			UBLC_tesselator_vertex(xlo, ylo, zhi, 0.0f, 0.0f, 1.0f,
-					1.0f, 1.0f);
-			break;
 		case UBLC_FACE_DOWN:
+			UBLC_tesselator_vertex(xlo, ylo, zhi, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			UBLC_tesselator_vertex(xlo, ylo, zlo, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			UBLC_tesselator_vertex(xhi, ylo, zlo, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			UBLC_tesselator_vertex(xhi, ylo, zhi, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			break;
+		case UBLC_FACE_UP:
+			UBLC_tesselator_vertex(xhi, yhi, zhi, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			UBLC_tesselator_vertex(xhi, yhi, zlo, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			UBLC_tesselator_vertex(xlo, yhi, zlo, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			UBLC_tesselator_vertex(xlo, yhi, zhi, 0.0f, 0.0f, 1.0f,
+					1.0f, 1.0f);
+			break;
+		case UBLC_FACE_FRONT:
 			UBLC_tesselator_vertex(xlo, yhi, zlo, 0.0f, 0.0f, 1.0f,
 					1.0f, 1.0f);
 			UBLC_tesselator_vertex(xhi, yhi, zlo, 0.0f, 0.0f, 1.0f,
@@ -165,7 +165,7 @@ void UBLC_tile_renderface(int x, int y, int z, enum UBLC_tile_face face) {
 			UBLC_tesselator_vertex(xlo, ylo, zlo, 0.0f, 0.0f, 1.0f,
 					1.0f, 1.0f);
 			break;
-		case UBLC_FACE_UP:
+		case UBLC_FACE_BACK:
 			UBLC_tesselator_vertex(xlo, yhi, zhi, 0.0f, 0.0f, 1.0f,
 					1.0f, 1.0f);
 			UBLC_tesselator_vertex(xlo, ylo, zhi, 0.0f, 0.0f, 1.0f,
