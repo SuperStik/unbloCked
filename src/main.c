@@ -11,11 +11,11 @@
 #include <SDL3/SDL_opengl.h>
 
 #include "anon_sem.h"
+#include "chronos.h"
 #include "gutl.h"
 #include "level/chunk.h"
 #include "level/levelrenderer.h"
 #include "level/level.h"
-#include "timer.h"
 
 struct threadinfo {
 	anon_sem_t swapsem;
@@ -28,8 +28,8 @@ static void *tick(void *_);
 static void *framerate(void *_);
 
 static int translatekey(SDL_Keycode);
-static void movecameratoplayer(float a);
-static void setupcamera(float a);
+static void movecameratoplayer(void);
+static void setupcamera(void);
 
 static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
@@ -39,6 +39,7 @@ static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
 
 size_t frames = 0;
 
+static float a;
 static uint32_t swapwindow;
 
 struct {
@@ -235,7 +236,7 @@ static int translatekey(SDL_Keycode key) {
 	return plykey;
 }
 
-static void movecameratoplayer(float a) {
+static void movecameratoplayer(void) {
 	glTranslatef(0.0f, 0.0f, -0.3f);
 
 	float pitch, yaw;
@@ -250,7 +251,7 @@ static void movecameratoplayer(float a) {
 	glTranslatef(-x, -y, -z);
 }
 
-static void setupcamera(float a) {
+static void setupcamera(void) {
 	glMatrixMode(GL_PROJECTION);
 
 	float matrix[16];
@@ -259,7 +260,7 @@ static void setupcamera(float a) {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	movecameratoplayer(a);
+	movecameratoplayer();
 }
 
 static void *render(void *i) {
@@ -282,8 +283,6 @@ static void *render(void *i) {
 		1.0f
 	};
 
-	UBLC_timer_init(60.0f);
-
 	/*glPolygonMode(GL_FRONT, GL_LINE);*/
 
 	while (!done) {
@@ -291,7 +290,7 @@ static void *render(void *i) {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		setupcamera(UBLC_timer_a);
+		setupcamera();
 
 		glEnable(GL_CULL_FACE);
 
@@ -323,12 +322,12 @@ static void *tick(void *_) {
 	pthread_setname_np("unbloCked.tickthread");
 
 	while (!done) {
-		UBLC_timer_advancetime();
+		struct timespec start;
+		UBLC_chronos_initialtime(&start);
+
 		UBLC_player_tick(&player);
 
-		long sleeptime = 999999999 / 60;
-		struct timespec sleeping = {.tv_sec = 0, .tv_nsec = sleeptime};
-		nanosleep(&sleeping, NULL);
+		UBLC_chronos_sleeprate(&start, 60, &a);
 	}
 
 	return NULL;

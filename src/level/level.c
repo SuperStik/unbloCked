@@ -41,7 +41,7 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 		return -1;
 	}
 
-	pthread_rwlock_wrlock(&levellock);
+	UBLC_level_wrlock();
 
 	for (unsigned x = 0; x < w; ++x) {
 		for (unsigned y = 0; y < d; ++y) {
@@ -54,7 +54,7 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 
 	UBLC_level_calclightdepths(0, 0, w, h);
 
-	pthread_rwlock_unlock(&levellock);
+	UBLC_level_unlock();
 
 	UBLC_levelrenderer_init();
 
@@ -62,7 +62,7 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 }
 
 void UBLC_level_delete(void) {
-	pthread_rwlock_wrlock(&levellock);
+	UBLC_level_wrlock();
 
 	free(blocks);
 	free(light_depths);
@@ -72,7 +72,7 @@ void UBLC_level_delete(void) {
 	light_depths = NULL;
 	cubes = NULL;
 
-	pthread_rwlock_unlock(&levellock);
+	UBLC_level_unlock();
 
 	UBLC_levelrenderer_delete();
 }
@@ -109,10 +109,12 @@ int UBLC_level_istile(unsigned x, unsigned y, unsigned z) {
 		return 0;
 
 	int istile;
-	pthread_rwlock_rdlock(&levellock);
+	UBLC_level_rdlock();
+
 	istile = blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] !=
 		0;
-	pthread_rwlock_unlock(&levellock);
+	UBLC_level_unlock();
+
 	return istile;
 }
 
@@ -172,10 +174,13 @@ const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *aabb,
 
 	numcubes = 0;
 
+	/* TODO: accept local array to make reentrant */
+	UBLC_level_wrlock();
+
 	for (float x = xlo; x < xhi; x += 1.0f) {
 		for (float y = ylo; y < yhi; y += 1.0f) {
 			for (float z = zlo; z < zhi; z += 1.0f) {
-				if (!UBLC_level_issolid(x,y,z))
+				if (!UBLC_level_issolid_unsafe(x,y,z))
 					continue;
 
 				UBLC_AABB_INIT(&cubes[numcubes], x, y, z, x +
@@ -186,6 +191,9 @@ const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *aabb,
 	}
 
 	*count = numcubes;
+
+	UBLC_level_unlock();
+
 	return cubes;
 }
 
@@ -199,9 +207,11 @@ float UBLC_level_getbrightness(unsigned x, unsigned y, unsigned z) {
 
 	float brightness;
 
-	pthread_rwlock_rdlock(&levellock);
+	UBLC_level_rdlock();
+
 	brightness = y < light_depths[x + z * UBLC_level_width] ? dark : light;
-	pthread_rwlock_unlock(&levellock);
+
+	UBLC_level_unlock();
 
 	return brightness;
 }
@@ -222,12 +232,12 @@ void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type) {
 			UBLC_level_height)
 		return;
 
-	pthread_rwlock_wrlock(&levellock);
+	UBLC_level_wrlock();
 
 	blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] = type;
 	UBLC_level_calclightdepths(x, z, 1, 1);
 
-	pthread_rwlock_unlock(&levellock);
+	UBLC_level_unlock();
 
 	UBLC_levelrenderer_setdirty(x, y, z);
 }
