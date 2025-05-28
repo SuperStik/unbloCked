@@ -17,8 +17,6 @@ struct UBLC_player *UBLC_player_init(struct UBLC_player *ply) {
 
 	ply->onground = 0;
 	ply->flying = 0;
-	ply->hasreset = 0;
-	ply->hasflighttoggle = 0;
 	ply->pitch = 0.0f;
 	ply->yaw = 0.0f;
 
@@ -106,11 +104,12 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 
 	int keys = UBLC_player_getkeys(ply);
 
-	if ((keys & UBLC_KF_R) && !ply->hasreset) {
+	int oneshotkeys = 0;
+
+	if (keys & UBLC_KF_R) {
 		resetpos(ply);
-		ply->hasreset = 1;
-	} else if (!(keys & UBLC_KF_R))
-		ply->hasreset = 0;
+		oneshotkeys |= UBLC_KF_R;
+	}
 
 	if (keys & (UBLC_KF_UP | UBLC_KF_W))
 		za -= 1.0f;
@@ -124,11 +123,10 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	if (keys & (UBLC_KF_RIGHT | UBLC_KF_D))
 		xa += 1.0f;
 
-	if ((keys & UBLC_KF_V) && !ply->hasflighttoggle) {
+	if (keys & UBLC_KF_V) {
 		ply->flying = !ply->flying;
-		ply->hasflighttoggle = 1;
-	} else if (!(keys & UBLC_KF_V))
-		ply->hasflighttoggle = 0;
+		oneshotkeys |= UBLC_KF_V;
+	}
 
 	int grounded = ply->onground;
 	int flying = ply->flying;
@@ -164,6 +162,9 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	if (flying) {
 		ply->yd *= 0.8f;
 	}
+
+	if (oneshotkeys)
+		UBLC_player_unsetkeys(ply, oneshotkeys);
 }
 
 void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {

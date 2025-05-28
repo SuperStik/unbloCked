@@ -49,8 +49,6 @@ struct UBLC_player {
 
 	unsigned char onground:1;
 	unsigned char flying:1;
-	unsigned char hasreset:1;
-	unsigned char hasflighttoggle:1;
 
 	unsigned char hasselect:1;
 	unsigned char placeface:3;

@@ -382,6 +382,7 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 				h /= 2;
 				SDL_WarpMouseInWindow(window, w, h);
 			}
+
 			break;
 		case SDLK_F11:
 			if (key->down) {
@@ -391,6 +392,8 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 				bool fscreen = !(fl & SDL_WINDOW_FULLSCREEN);
 				SDL_SetWindowFullscreen(window, fscreen);
 			}
+
+			break;
 		case SDLK_UP:
 		case SDLK_DOWN:
 		case SDLK_LEFT:
@@ -403,11 +406,15 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		case SDLK_R:
 		case SDLK_LSHIFT:
 		case SDLK_RSHIFT:
-		case SDLK_V:;
+		case SDLK_V:
+			if (!key->down || key->repeat)
+				break;
+
 			int plykey = translatekey(key->key);
-			if (key->down)
-				UBLC_player_setkeys(&player, plykey);
-		}
+			UBLC_player_setkeys(&player, plykey);
+
+			break;
+	}
 
 keyevent_ret:
 	return key->down && key->key == SDLK_ESCAPE;
@@ -424,15 +431,13 @@ static void keyevent_up_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 		case SDLK_A:
 		case SDLK_D:
 		case SDLK_SPACE:
-		case SDLK_R:
 		case SDLK_LSHIFT:
 		case SDLK_RSHIFT:
-		case SDLK_V:;
-			    int plykey = translatekey(key->key);
-			    UBLC_player_unsetkeys(&player, plykey);
-			    break;
+			;
+			int plykey = translatekey(key->key);
+			UBLC_player_unsetkeys(&player, plykey);
+			break;
 	}
-
 }
 
 static void mousemotionevent_handler(SDL_MouseMotionEvent *motion,
