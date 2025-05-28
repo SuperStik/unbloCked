@@ -19,6 +19,7 @@ void UBLC_chunk_initstatic(void) {
 void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	pthread_mutex_lock(&(chunk->lock));
 	if (chunk->_dirty) {
+		__atomic_add_fetch(&UBLC_chunk_updates, 1ul, __ATOMIC_RELAXED);
 		rebuild(chunk, 0);
 		rebuild(chunk, 1);
 		chunk->_dirty = 0;
@@ -51,8 +52,6 @@ void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
 }
 
 static void rebuild(struct UBLC_chunk *chunk, int layer) {
-	++UBLC_chunk_updates;
-
 	glNewList(chunk->_lists + layer, GL_COMPILE);
 
 	glEnable(GL_TEXTURE_2D);

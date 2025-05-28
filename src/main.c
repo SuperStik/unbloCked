@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_opengl.h>
@@ -24,6 +25,7 @@ struct threadinfo {
 
 static void *render(void *sem);
 static void *tick(void *_);
+static void *framerate(void *_);
 
 static int translatekey(SDL_Keycode);
 static void movecameratoplayer(float a);
@@ -34,6 +36,8 @@ static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
 
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
+
+size_t frames = 0;
 
 static uint32_t swapwindow;
 
@@ -109,9 +113,10 @@ int main(void) {
 	if (anon_sem_init(&info.swapsem, 1))
 		err(2, NULL);
 
-	pthread_t threads[2];
+	pthread_t threads[3];
 	pthread_create(&(threads[0]), NULL, render, &info);
 	pthread_create(&(threads[1]), NULL, tick, NULL);
+	pthread_create(&(threads[2]), NULL, framerate, NULL);
 
 	while (!done) {
 		SDL_Event event;
@@ -153,7 +158,7 @@ int main(void) {
 
 	anon_sem_post(&(info.swapsem));
 
-	for (int i = 0; i < 2; ++i)
+	for (int i = 0; i < 3; ++i)
 		pthread_join(threads[i], NULL);
 
 	anon_sem_post(&(info.swapsem));
@@ -303,6 +308,8 @@ static void *render(void *i) {
 
 		glDisable(GL_POLYGON_SMOOTH);
 
+		__atomic_add_fetch(&frames, 1, __ATOMIC_RELAXED);
+
 		event.user.timestamp = SDL_GetTicks();
 		SDL_PushEvent(&event);
 	}
@@ -322,6 +329,22 @@ static void *tick(void *_) {
 		long sleeptime = 999999999 / 60;
 		struct timespec sleeping = {.tv_sec = 0, .tv_nsec = sleeptime};
 		nanosleep(&sleeping, NULL);
+	}
+
+	return NULL;
+}
+
+static void *framerate(void *_) {
+	while (!done) {
+		size_t fps;
+		size_t updates;
+		fps = __atomic_exchange_n(&frames, 0ul, __ATOMIC_RELAXED);
+		updates = __atomic_exchange_n(&UBLC_chunk_updates, 0ul,
+				__ATOMIC_RELAXED);
+
+		fprintf(stderr, "%zu fps, %zu\n", fps, updates);
+
+		sleep(1u);
 	}
 
 	return NULL;
