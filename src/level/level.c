@@ -90,6 +90,7 @@ void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
 	if ((zlo + zhi) >= UBLC_level_height)
 		zhi = (UBLC_level_height - 1) - zlo;
 
+	unsigned ylo = UBLC_level_depth;
 	for (unsigned x = xlo; x < xlo + xhi; ++x) {
 		for (unsigned z = zlo; z < zlo + zhi; ++z) {
 			unsigned y;
@@ -233,16 +234,33 @@ void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type) {
 		return;
 
 	UBLC_level_wrlock();
+	unsigned ylo = y;
+	if (ylo > 0)
+		--ylo;
 
 	blocks[(y * UBLC_level_height + z) * UBLC_level_width + x] = type;
 	UBLC_level_calclightdepths(x, z, 1, 1);
+
+	for (; ylo > 0; --ylo) {
+		if (UBLC_level_islightblocker_unsafe(x, ylo, z))
+			break;
+	}
 
 	UBLC_level_unlock();
 
 	__builtin_prefetch(&(blocks[(y * UBLC_level_height + z) *
 				UBLC_level_width + x]), 0, 2);
 
-	UBLC_levelrenderer_setdirty(x, y, z);
+	unsigned xlo = x;
+	unsigned zlo = z;
+
+	if (xlo != 0)
+		--xlo;
+
+	if (zlo != 0)
+		--zlo;
+
+	UBLC_levelrenderer_setdirtyrange(xlo, ylo, zlo, x + 1, y + 1, z + 1);
 }
 
 struct UBLC_hitresult *UBLC_level_clip(struct UBLC_hitresult *hit, float
