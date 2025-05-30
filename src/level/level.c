@@ -274,15 +274,15 @@ struct UBLC_hitresult *UBLC_level_clip(struct UBLC_hitresult *hit, float
 		return hit;
 	}
 
-	unsigned ilo[3] = {
-		(unsigned)vstart[0],
-		(unsigned)vstart[1],
-		(unsigned)vstart[2]
+	long ilo[3] = {
+		(long)vstart[0],
+		(long)vstart[1],
+		(long)vstart[2]
 	};
-	unsigned ihi[3] = {
-		(unsigned)vend[0],
-		(unsigned)vend[1],
-		(unsigned)vend[2]
+	long ihi[3] = {
+		(long)vend[0],
+		(long)vend[1],
+		(long)vend[2]
 	};
 
 	for (int i = 20; i >= 0; --i) {
@@ -337,7 +337,7 @@ struct UBLC_hitresult *UBLC_level_clip(struct UBLC_hitresult *hit, float
 		}
 
 		for (int j = 0; j < 3; ++j) {
-			ilo[j] = (unsigned)vstart[j];
+			ilo[j] = (long)vstart[j];
 		}
 
 		switch (c) {
