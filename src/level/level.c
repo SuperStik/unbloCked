@@ -91,8 +91,8 @@ void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
 		zhi = (UBLC_level_height - 1) - zlo;
 
 	unsigned ylo = UBLC_level_depth;
-	for (unsigned x = xlo; x < xlo + xhi; ++x) {
-		for (unsigned z = zlo; z < zlo + zhi; ++z) {
+	for (unsigned x = xlo; x <= xlo + xhi; ++x) {
+		for (unsigned z = zlo; z <= zlo + zhi; ++z) {
 			unsigned y;
 			for (y = UBLC_level_depth - 1; y > 0 &&
 					!UBLC_level_islightblocker_unsafe(x, y,
