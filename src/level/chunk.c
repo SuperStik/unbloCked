@@ -55,7 +55,7 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, r));
 
-	glDrawArrays(GL_QUADS, 0, chunk->indices);
+	glDrawArrays(GL_QUADS, 0, chunk->indices[layer]);
 
 	glDisable(GL_TEXTURE_2D);
 
@@ -107,25 +107,21 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 				int tex = (y != ((UBLC_level_depth * 2) / 3));
 				size_t c = UBLC_tile_render(&(cpuvbo[bufcount]),
 						tex, layer, x, y, z);
+
 				bufcount += c;
 			}
 		}
 	}
 
-	/*if (bufcount > 0) {
-		warnx("%zu", bufcount);
-		warnx("%g %g %g", cpuvbo[0].x, cpuvbo[0].y, cpuvbo[0].z);
-	}*/
-
 	UBLC_level_unlock();
 
 	glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);	
-	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * bufcount, cpuvbo, GL_STATIC_DRAW);
-	chunk->indices = bufcount;
+	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * bufcount,
+			cpuvbo, GL_STATIC_DRAW);
+	chunk->indices[layer] = bufcount;
 	UBLC_tesselator_flush();
 	glDisable(GL_TEXTURE_2D);
-	glEndList();
 }
 
 void UBLC_chunk_setdirty(struct UBLC_chunk *chunk) {

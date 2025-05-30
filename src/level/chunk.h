@@ -9,7 +9,7 @@
 
 struct UBLC_chunk {
 	pthread_mutex_t lock;
-	size_t indices;
+	size_t indices[2];
 	struct UBLC_AABB aabb;
 	float vertices[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 8];
 	unsigned x_lo;
