@@ -1,3 +1,4 @@
+#define GL_GLEXT_PROTOTYPES 1
 #include <err.h>
 #include <math.h>
 #include <pthread.h>
@@ -15,13 +16,13 @@
 #include "tesselator.h"
 #include "tile.h"
 
-#define CHUNK_SIZE 16
+static struct UBLC_chunk *chunks;
 
 static unsigned xchunks;
 static unsigned ychunks;
 static unsigned zchunks;
 
-static struct UBLC_chunk *chunks;
+static unsigned selectbuffer;
 
 void UBLC_levelrenderer_init(void) {
 	xchunks = UBLC_level_width / CHUNK_SIZE;
@@ -32,6 +33,8 @@ void UBLC_levelrenderer_init(void) {
 	chunks = malloc(totalchunks * sizeof(*chunks));
 	if (chunks == NULL)
 		err(2, "malloc");
+
+	glGenBuffers(1, &selectbuffer);
 
 	for (unsigned x = 0; x < xchunks; ++x) {
 		for (unsigned y = 0; y < ychunks; ++y) {
@@ -61,6 +64,8 @@ void UBLC_levelrenderer_init(void) {
 void UBLC_levelrenderer_delete(void) {
 	for (size_t i = 0; i < ((size_t)xchunks * ychunks * zchunks); ++i)
 		UBLC_chunk_delete(chunks + i);
+
+	glDeleteBuffers(1, &selectbuffer);
 
 	free(chunks);
 	chunks = NULL;
@@ -122,20 +127,31 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 			break;
 	}
 
-	UBLC_tesselator_settexture(0);
-	UBLC_tesselator_setcolor(0);
+	struct UBLC_vbuffer buf[4];
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	UBLC_tile_renderface(buf, xlo, ylo, zlo, facing);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+
+	glBindBuffer(GL_ARRAY_BUFFER, selectbuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 4, buf,
+			GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, selectbuffer);
+	glVertexPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
+			(void *)offsetof(struct UBLC_vbuffer, x));
+	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
+			(void *)offsetof(struct UBLC_vbuffer, r));
 
 	glColor4d(1.0, 1.0, 1.0, sin((double)SDL_GetTicks() / 100.0) * 0.2 +
 			0.4);
 
-	UBLC_tile_renderface(xlo, ylo, zlo, facing);
-
-	UBLC_tesselator_flush();
-
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	glDrawArrays(GL_QUADS, 0, 4);
 	glDisable(GL_BLEND);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glFlush();
 }
@@ -160,12 +176,12 @@ void UBLC_levelrenderer_setdirtyrange(unsigned xlo, unsigned ylo, unsigned zlo,
 		zlo = temp;
 	}
 
-	xlo /= 16u;
-	ylo /= 16u;
-	zlo /= 16u;
-	xhi /= 16u;
-	yhi /= 16u;
-	zhi /= 16u;
+	xlo /= CHUNK_SIZE;
+	ylo /= CHUNK_SIZE;
+	zlo /= CHUNK_SIZE;
+	xhi /= CHUNK_SIZE;
+	yhi /= CHUNK_SIZE;
+	zhi /= CHUNK_SIZE;
 
 	if (xhi >= xchunks)
 		xhi = xchunks - 1;

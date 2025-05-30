@@ -5,16 +5,20 @@
 
 #include <phys/AABB.h>
 
+#define CHUNK_SIZE 16
+
 struct UBLC_chunk {
 	pthread_mutex_t lock;
+	size_t indices[2];
 	struct UBLC_AABB aabb;
+	float vertices[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 8];
 	unsigned x_lo;
 	unsigned y_lo;
 	unsigned z_lo;
 	unsigned x_hi;
 	unsigned y_hi;
 	unsigned z_hi;
-	unsigned _lists;
+	unsigned _buffers[2];
 	unsigned char _dirty:1;
 };
 
