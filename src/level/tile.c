@@ -1,8 +1,10 @@
+#include <err.h>
+
 #include "level.h"
 #include "tesselator.h"
 #include "tile.h"
 
-void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
+size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 		int y, int z) {
 	float ulo = (float)tex / 16.0f;
 	float uhi = ulo + 1.0f / 16.0f;
@@ -22,6 +24,8 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 
 	float br;
 
+	struct UBLC_vbuffer *orig = buf;
+
 	/* my fingers hurt */
 	if (!UBLC_level_issolid_unsafe(x, y - 1, z)) {
 		br = UBLC_level_getbrightness_unsafe(x, y - 1, z) * side;
@@ -29,13 +33,13 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(buf, xlo, ylo, zhi, uhi, vhi, br,
+			UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, ylo, zlo, uhi, vlo, br,
+			UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, ylo, zlo, ulo, vlo, br,
+			UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, ylo, zhi, ulo, vhi, br,
+			UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi, br,
 					br, br);
 		}
 	}
@@ -46,13 +50,13 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(buf, xhi, yhi, zhi, uhi, vhi, br,
+			UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, yhi, zlo, uhi, vlo, br,
+			UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, yhi, zlo, ulo, vlo, br,
+			UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, yhi, zhi, ulo, vhi, br,
+			UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vhi, br,
 					br, br);
 		}
 	}
@@ -63,13 +67,13 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(buf, xlo, yhi, zlo, uhi, vlo, br,
+			UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, uhi, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, yhi, zlo, ulo, vlo, br,
+			UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, ulo, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, ylo, zlo, ulo, vhi, br,
+			UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, ylo, zlo, uhi, vhi, br,
+			UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vhi, br,
 					br, br);
 		}
 	}
@@ -80,13 +84,13 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(buf, xlo, yhi, zhi, ulo, vlo, br,
+			UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, ylo, zhi, ulo, vhi, br,
+			UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, ulo, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, ylo, zhi, uhi, vhi, br,
+			UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, uhi, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, yhi, zhi, uhi, vlo, br,
+			UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vlo, br,
 					br, br);
 		}
 	}
@@ -97,13 +101,13 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(buf, xlo, yhi, zhi, uhi, vlo, br,
+			UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, uhi, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, yhi, zlo, ulo, vlo, br,
+			UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, ylo, zlo, ulo, vhi, br,
+			UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, ulo, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xlo, ylo, zhi, uhi, vhi, br,
+			UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi, br,
 					br, br);
 		}
 	}
@@ -114,17 +118,18 @@ void UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 			UBLC_tesselator_setcolor(1);
 			UBLC_tesselator_settexture(1);
 
-			UBLC_tesselator_vertex(buf, xhi, ylo, zhi, ulo, vhi, br,
+			UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, ylo, zlo, uhi, vhi, br,
+			UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, uhi, vhi, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, yhi, zlo, uhi, vlo, br,
+			UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br,
 					br, br);
-			UBLC_tesselator_vertex(buf, xhi, yhi, zhi, ulo, vlo, br,
+			UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, ulo, vlo, br,
 					br, br);
 		}
 	}
 
+	return buf - orig;
 }
 
 void UBLC_tile_renderface(int x, int y, int z, enum UBLC_tile_face face) {
