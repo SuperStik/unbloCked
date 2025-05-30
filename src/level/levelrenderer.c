@@ -15,8 +15,6 @@
 #include "tesselator.h"
 #include "tile.h"
 
-#define CHUNK_SIZE 16
-
 static unsigned xchunks;
 static unsigned ychunks;
 static unsigned zchunks;
@@ -160,12 +158,12 @@ void UBLC_levelrenderer_setdirtyrange(unsigned xlo, unsigned ylo, unsigned zlo,
 		zlo = temp;
 	}
 
-	xlo /= 16u;
-	ylo /= 16u;
-	zlo /= 16u;
-	xhi /= 16u;
-	yhi /= 16u;
-	zhi /= 16u;
+	xlo /= CHUNK_SIZE;
+	ylo /= CHUNK_SIZE;
+	zlo /= CHUNK_SIZE;
+	xhi /= CHUNK_SIZE;
+	yhi /= CHUNK_SIZE;
+	zhi /= CHUNK_SIZE;
 
 	if (xhi >= xchunks)
 		xhi = xchunks - 1;

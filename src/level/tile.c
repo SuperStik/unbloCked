@@ -2,7 +2,7 @@
 #include "tesselator.h"
 #include "tile.h"
 
-void UBLC_tile_render(int tex, int layer, int x, int y, int z) {
+void UBLC_tile_render(struct UBLC_vbuffer *buffer, size_t count, int tex, int layer, int x, int y, int z) {
 	float ulo = (float)tex / 16.0f;
 	float uhi = ulo + 1.0f / 16.0f;
 	float vlo = 0.0f;
