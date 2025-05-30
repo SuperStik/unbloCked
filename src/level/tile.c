@@ -165,8 +165,7 @@ void UBLC_tile_renderface(struct UBLC_vbuffer buf[4], int x, int y, int z, enum 
 			break;
 		case UBLC_FACE_LEFT:
 			UBLC_tesselator_vertex(buf + 0, xlo, yhi, zhi, 0.0f,
-					0.0f,
-					1.0f, 1.0f, 1.0f);
+					0.0f, 1.0f, 1.0f, 1.0f);
 			UBLC_tesselator_vertex(buf + 1, xlo, yhi, zlo, 0.0f,
 					0.0f, 1.0f, 1.0f, 1.0f);
 			UBLC_tesselator_vertex(buf + 2, xlo, ylo, zlo, 0.0f,
