@@ -44,7 +44,7 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 
 	/* TODO: fix this! */
 	glVertexPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
-			(void *)(sizeof(float) * 8));
+			(void *)offsetof(struct UBLC_vbuffer, x));
 	glTexCoordPointer(2, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, u));
 	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
