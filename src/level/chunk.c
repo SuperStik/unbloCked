@@ -93,8 +93,6 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	UBLC_tesselator_init();
-
 	UBLC_level_rdlock();
 
 	size_t bufcount = 0;
@@ -120,7 +118,6 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * bufcount,
 			cpuvbo, GL_STATIC_DRAW);
 	chunk->indices[layer] = bufcount;
-	UBLC_tesselator_flush();
 	glDisable(GL_TEXTURE_2D);
 }
 

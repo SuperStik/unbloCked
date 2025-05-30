@@ -20,6 +20,7 @@ enum UBLC_tile_face {
 size_t UBLC_tile_render(struct UBLC_vbuffer *buffer, int tex, int layer, int x,
 		int y, int z);
 
-void UBLC_tile_renderface(int x, int y, int z, enum UBLC_tile_face);
+void UBLC_tile_renderface(struct UBLC_vbuffer buf[4], int x, int y, int z, enum
+		UBLC_tile_face);
 
 #endif /* UBLC_LEVEL_TILE_H */
