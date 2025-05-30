@@ -33,6 +33,31 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	}
 
 	pthread_mutex_unlock(&(chunk->lock));
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
+	glEnable(GL_TEXTURE_2D);
+
+	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
+
+	/* TODO: fix this! */
+	glVertexPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
+			(void *)(sizeof(float) * 8));
+	glTexCoordPointer(2, GL_FLOAT, sizeof(struct UBLC_vbuffer),
+			(void *)offsetof(struct UBLC_vbuffer, u));
+	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
+			(void *)offsetof(struct UBLC_vbuffer, r));
+
+	glDrawArrays(GL_QUADS, 0, chunk->indices);
+
+	glDisable(GL_TEXTURE_2D);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+
 }
 
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
@@ -45,7 +70,7 @@ struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 	chunk->x_hi = x_hi;
 	chunk->y_hi = y_hi;
 	chunk->z_hi = z_hi;
-	glGenBuffers(2, &(chunk->_buffers));
+	glGenBuffers(2, chunk->_buffers);
 	chunk->_dirty = 1;
 	pthread_mutex_init(&(chunk->lock), NULL);
 
@@ -53,7 +78,7 @@ struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 }
 
 void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
-	glDeleteBuffers(2, &(chunk->_buffers));
+	glDeleteBuffers(2, chunk->_buffers);
 	pthread_mutex_destroy(&(chunk->lock));
 }
 
@@ -67,6 +92,7 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 
 	UBLC_level_rdlock();
 
+	size_t bufcount = 0;
 	for (unsigned x = chunk->x_lo; x < chunk->x_hi; ++x) {
 		for (unsigned y = chunk->y_lo; y < chunk->y_hi; ++y) {
 			for (unsigned z = chunk->z_lo; z < chunk->z_hi; ++z) {
@@ -74,13 +100,20 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 					continue;
 
 				int tex = (y != ((UBLC_level_depth * 2) / 3));
-				UBLC_tile_render(cpuvbo, tex, layer, x, y, z);
+				UBLC_tile_render(&(cpuvbo[bufcount]), tex,
+						layer, x, y, z);
+				++bufcount;
 			}
 		}
 	}
 
+	
+
 	UBLC_level_unlock();
 
+	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * bufcount, cpuvbo, GL_STATIC_DRAW);
+	chunk->indices = bufcount;
 	UBLC_tesselator_flush();
 	glDisable(GL_TEXTURE_2D);
 	glEndList();
