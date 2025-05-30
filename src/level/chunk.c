@@ -74,8 +74,7 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 					continue;
 
 				int tex = (y != ((UBLC_level_depth * 2) / 3));
-				UBLC_tile_render(cpuvbo, BUFFER_COUNT, tex,
-						layer, x, y, z);
+				UBLC_tile_render(cpuvbo, tex, layer, x, y, z);
 			}
 		}
 	}

@@ -15,8 +15,8 @@ enum UBLC_tile_face {
 	UBLC_FACE_RIGHT
 };
 
-void UBLC_tile_render(struct UBLC_vbuffer *buffer, size_t count, int tex, int
-		layer, int x, int y, int z);
+void UBLC_tile_render(struct UBLC_vbuffer *buffer, int tex, int layer, int x,
+		int y, int z);
 
 void UBLC_tile_renderface(int x, int y, int z, enum UBLC_tile_face);
 

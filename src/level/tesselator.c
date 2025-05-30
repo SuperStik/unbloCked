@@ -6,6 +6,7 @@
 
 #include "../gutl.h"
 #include "tesselator.h"
+#include "vbuffer.h"
 
 #define MAX_VERTICES 100000
 
@@ -81,8 +82,19 @@ int UBLC_tesselator_gettexture(void) {
 	return flags.texture;
 }
 
-void UBLC_tesselator_vertex(float x, float y, float z, float u, float v, float
-		r, float g, float b) {
+void UBLC_tesselator_vertex(struct UBLC_vbuffer *buf, float x, float y, float z,
+		float u, float v, float r, float g, float b) {
+	buf->x = x;
+	buf->y = y;
+	buf->z = z;
+
+	buf->u = u;
+	buf->v = v;
+
+	buf->r = r;
+	buf->g = g;
+	buf->b = b;
+
 	vertexbuffer[vertices * 3 + 0] = x;
 	vertexbuffer[vertices * 3 + 1] = y;
 	vertexbuffer[vertices * 3 + 2] = z;
