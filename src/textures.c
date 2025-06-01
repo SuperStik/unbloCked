@@ -45,10 +45,10 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mode);
 
-	int texture_fd = openat(UBLC_resource_fd, resource, O_RDONLY |
+	int texture_fd = openat(UBLC_fs.resources, resource, O_RDONLY |
 			O_SHLOCK);
 	if (texture_fd < 0)
-		err(2, "openat: %i %s", UBLC_resource_fd, resource);
+		err(2, "openat: %i %s", UBLC_fs.resources, resource);
 
 	FILE *texfile = fdopen(texture_fd, "rb");
 	if (texfile == NULL)

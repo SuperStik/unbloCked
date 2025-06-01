@@ -6,7 +6,7 @@
 
 #include "resources.h"
 
-int UBLC_resource_fd = -1;
+struct UBLC_fs UBLC_fs = {-1, -1};
 
 __attribute__((constructor)) static void resource_init(void) {
 	const char *path = SDL_GetBasePath();
@@ -21,16 +21,31 @@ __attribute__((constructor)) static void resource_init(void) {
 	if (res_fd < 0)
 		err(2, "openat: %i %s", base, "resources");
 
-	UBLC_resource_fd = res_fd;
+	UBLC_fs.resources = res_fd;
 
 	if (close(base))
 		warn("close: %i", base);
+
+	char *pref = SDL_GetPrefPath("devStik", "unbloCked");
+	if (pref == NULL)
+		errx(2, "%s", SDL_GetError());
+
+	int pref_fd = open(pref, O_SEARCH | O_DIRECTORY);
+	if (pref_fd < 0)
+		err(2, "open: %s", pref);
+
+	UBLC_fs.pref = pref_fd;
+
+	SDL_free(pref);
 }
 
 /* fds are closed on exit */
 /*
 __attribute__((destructor)) static void resource_close(void) {
-	if (close(UBLC_resource_fd))
-		warn("close: %i", UBLC_resource_fd);
+	if (close(UBLC_fs.resources))
+		warn("close: %i", UBLC_fs.resources);
+
+	if (close(UBLC_fs.pref))
+		warn("close: %i", UBLC_fs.pref);
 }
 */
