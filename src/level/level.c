@@ -76,6 +76,8 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 }
 
 void UBLC_level_delete(void) {
+	UBLC_level_save();
+
 	UBLC_level_wrlock();
 
 	free(blocks);
