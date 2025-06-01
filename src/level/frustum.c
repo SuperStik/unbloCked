@@ -1,6 +1,6 @@
 #include <math.h>
 
-#include <OpenGL/gl.h>
+#include <SDL3/SDL_opengl.h>
 
 #include "frustum.h"
 
@@ -69,9 +69,6 @@ static gvec(float,4) normalizeplane(gvec(float,4) frustum) {
 	return frustum;
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-
 static void calculate(gvec(float,4) frustum[6]) {
 	union {
 		float array;
@@ -104,5 +101,3 @@ static void calculate(gvec(float,4) frustum[6]) {
 		frustum[i+1] = normalizeplane(frustum[i+1]);
 	}
 }
-
-#pragma GCC diagnostic pop
