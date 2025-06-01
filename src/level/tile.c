@@ -125,8 +125,8 @@ void UBLC_tile_renderface(struct UBLC_vbuffer buf[4], int x, int y, int z, enum 
 	float zlo = (float)z + 0.0f;
 	float zhi = (float)z + 1.0f;
 
-	float ticktime = (float)(SDL_GetTicks() % 36000);
-	float br = __sinpif(ticktime / 360.0f) * 0.2f + 0.4f;
+	float ticktime = (float)(SDL_GetTicks() % 36000) / 100.0f;
+	float br = __sinpif(ticktime * 48.0f / 180.0f) * 0.2f + 0.4f;
 
 	switch (face) {
 		case UBLC_FACE_DOWN:
