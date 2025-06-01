@@ -39,6 +39,7 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 	light_depths = malloc(w * h * sizeof(unsigned));
 	if (light_depths == NULL) {
 		free(blocks);
+		blocks = NULL;
 		return -1;
 	}
 
@@ -46,6 +47,8 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 	if (cubes == NULL) {
 		free(blocks);
 		free(light_depths);
+		blocks = NULL;
+		light_depths = NULL;
 		return -1;
 	}
 
