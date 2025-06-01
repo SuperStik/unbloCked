@@ -397,6 +397,12 @@ static int keyevent_down_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 			}
 
 			break;
+		case SDLK_RETURN:
+			if (key->down) {
+				UBLC_level_save();
+			}
+
+			break;
 		case SDLK_UP:
 		case SDLK_DOWN:
 		case SDLK_LEFT:

@@ -1,10 +1,18 @@
 #include <err.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <math.h>
 #include <pthread.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "level.h"
 #include "levelrenderer.h"
+#include "resources.h"
 
 unsigned UBLC_level_width;
 unsigned UBLC_level_height;
@@ -52,6 +60,8 @@ int UBLC_level_new(unsigned w, unsigned h, unsigned d) {
 		}
 	}
 
+	UBLC_level_load();
+
 	UBLC_level_calclightdepths(0, 0, w, h);
 
 	UBLC_level_unlock();
@@ -75,6 +85,51 @@ void UBLC_level_delete(void) {
 	UBLC_level_unlock();
 
 	UBLC_levelrenderer_delete();
+}
+
+void UBLC_level_save() {
+	int save = openat(UBLC_fs.pref, "level.dat", O_WRONLY | O_CREAT |
+			O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	if (save < 0)
+		err(2, "openat: %i %s", UBLC_fs.pref, "level.dat");
+
+	UBLC_level_rdlock();
+
+	size_t worldsize = (size_t)UBLC_level_width * UBLC_level_height *
+		UBLC_level_depth;
+
+	if (write(save, blocks, worldsize) < 0)
+		err(2, "write: %i", save);
+
+	UBLC_level_unlock();
+
+	if (close(save))
+		warn("close: %i", save);
+}
+
+/* TODO: thread safety */
+void UBLC_level_load(void) {
+	int save = openat(UBLC_fs.pref, "level.dat", O_RDONLY);
+
+	if (save < 0 && errno != ENOENT)
+		err(2, "openat: %i %s", UBLC_fs.pref, "level.dat");
+	else if (save < 0)
+		return;
+
+	size_t worldsize = (size_t)UBLC_level_width * UBLC_level_height *
+		UBLC_level_depth;
+
+	void *level = mmap(NULL, worldsize, PROT_READ, MAP_PRIVATE, save, 0);
+	if (level == MAP_FAILED)
+		err(2, "mmap: %i", save);
+
+	memcpy(blocks, level, worldsize);
+
+	if (munmap(level, worldsize))
+		warn("munmap: %i", save);
+
+	if (close(save))
+		warn("close: %i", save);
 }
 
 void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
