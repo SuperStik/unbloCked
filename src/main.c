@@ -292,6 +292,8 @@ static void *render(void *i) {
 
 	/*glPolygonMode(GL_FRONT, GL_LINE);*/
 
+	pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 1);
+
 	while (!done) {
 		anon_sem_wait(swapsem);
 
@@ -327,6 +329,7 @@ static void *tick(void *_) {
 	(void)_;
 
 	pthread_setname_np("unbloCked.tick");
+	pthread_set_qos_class_self_np(QOS_CLASS_USER_INITIATED, 0);
 
 	while (!done) {
 		struct timespec start;
