@@ -20,7 +20,7 @@ RES_OUT = $(patsubst ${RES}/%,${RES_DIR}/%,${RES_SRC})
 GLSL_VERT_OUT = $(patsubst ${GLSL_SRC}/%.vert,${GLSL_DIR}/%.vert,${GLSL_VERT})
 GLSL_FRAG_OUT = $(patsubst ${GLSL_SRC}/%.frag,${GLSL_DIR}/%.frag,${GLSL_FRAG})
 
-override LIB += m png pthread sdl3
+override LIB += m png pthread sdl3 z
 override FRAMEWORK += OpenGL
 override LIB_PATH += /usr/local/lib
 override INCL_PATH += src /usr/local/include

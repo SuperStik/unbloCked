@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#include <zlib.h>
 
 #include "level.h"
 #include "levelrenderer.h"
@@ -91,48 +92,54 @@ void UBLC_level_delete(void) {
 }
 
 void UBLC_level_save() {
-	int save = openat(UBLC_fs.pref, "level.dat", O_WRONLY | O_CREAT |
+	int savefd = openat(UBLC_fs.pref, "level.dat", O_WRONLY | O_CREAT |
 			O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	if (save < 0)
+	if (savefd < 0)
 		err(2, "openat: %i %s", UBLC_fs.pref, "level.dat");
+
+	gzFile save = gzdopen(savefd, "wb9");
+	if (save == Z_NULL)
+		err(2, "gzdopen: %i", savefd);
 
 	UBLC_level_rdlock();
 
 	size_t worldsize = (size_t)UBLC_level_width * UBLC_level_height *
 		UBLC_level_depth;
 
-	if (write(save, blocks, worldsize) < 0)
-		err(2, "write: %i", save);
+	int wrsize = gzwrite(save, blocks, worldsize);
+	if (wrsize == 0)
+		errx(2, "gzwrite: %s", gzerror(save, &wrsize));
 
 	UBLC_level_unlock();
 
-	if (close(save))
-		warn("close: %i", save);
+	wrsize = gzclose(save);
+	if (wrsize != Z_OK)
+		warnx("gzclose: %s", zError(wrsize));
 }
 
 /* TODO: thread safety */
 void UBLC_level_load(void) {
-	int save = openat(UBLC_fs.pref, "level.dat", O_RDONLY);
+	int savefd = openat(UBLC_fs.pref, "level.dat", O_RDONLY);
 
-	if (save < 0 && errno != ENOENT)
+	if (savefd < 0 && errno != ENOENT)
 		err(2, "openat: %i %s", UBLC_fs.pref, "level.dat");
-	else if (save < 0)
+	else if (savefd < 0)
 		return;
+
+	gzFile save = gzdopen(savefd, "rb");
+	if (save == Z_NULL)
+		err(2, "gzdopen: %i", savefd);
 
 	size_t worldsize = (size_t)UBLC_level_width * UBLC_level_height *
 		UBLC_level_depth;
 
-	void *level = mmap(NULL, worldsize, PROT_READ, MAP_PRIVATE, save, 0);
-	if (level == MAP_FAILED)
-		err(2, "mmap: %i", save);
+	int rdsize = gzread(save, blocks, worldsize);
+	if (rdsize == 0)
+		err(2, "gzread: %s", gzerror(save, &rdsize));
 
-	memcpy(blocks, level, worldsize);
-
-	if (munmap(level, worldsize))
-		warn("munmap: %i", save);
-
-	if (close(save))
-		warn("close: %i", save);
+	rdsize = gzclose(save);
+	if (rdsize != Z_OK)
+		warnx("gzclose: %s", zError(rdsize));
 }
 
 void UBLC_level_calclightdepths(unsigned xlo, unsigned zlo, unsigned xhi,
