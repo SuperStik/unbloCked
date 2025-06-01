@@ -79,7 +79,9 @@ int main(void) {
 		errx(2, "%s", SDL_GetError());
 
 	SDL_GL_MakeCurrent(window, gl_context);
-	SDL_GL_SetSwapInterval(1);
+
+	if (!SDL_GL_SetSwapInterval(-1))
+		SDL_GL_SetSwapInterval(1);
 
 	glEnable(GL_TEXTURE_2D);
 
