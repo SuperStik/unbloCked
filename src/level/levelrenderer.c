@@ -1,11 +1,9 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <err.h>
-#include <math.h>
 #include <pthread.h>
 #include <stdlib.h>
 
 #include <SDL3/SDL_opengl.h>
-#include <SDL3/SDL_timer.h>
 
 #include "chunk.h"
 #include "frustum.h"
@@ -132,6 +130,7 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	UBLC_tile_renderface(buf, xlo, ylo, zlo, facing);
 
 	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
 
 	glBindBuffer(GL_ARRAY_BUFFER, selectbuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 4, buf,
@@ -143,14 +142,12 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, r));
 
-	glColor4d(1.0, 1.0, 1.0, sin((double)SDL_GetTicks() / 100.0) * 0.2 +
-			0.4);
-
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	glDrawArrays(GL_QUADS, 0, 4);
 	glDisable(GL_BLEND);
 
+	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
 	glFlush();

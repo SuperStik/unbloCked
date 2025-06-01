@@ -1,4 +1,7 @@
 #include <err.h>
+#include <math.h>
+
+#include <SDL3/SDL_timer.h>
 
 #include "level.h"
 #include "tesselator.h"
@@ -122,66 +125,69 @@ void UBLC_tile_renderface(struct UBLC_vbuffer buf[4], int x, int y, int z, enum 
 	float zlo = (float)z + 0.0f;
 	float zhi = (float)z + 1.0f;
 
+	float ticktime = (float)(SDL_GetTicks() % 36000);
+	float br = __sinpif(ticktime / 360.0f) * 0.2f + 0.4f;
+
 	switch (face) {
 		case UBLC_FACE_DOWN:
 			UBLC_tesselator_vertex(buf + 0, xlo, ylo, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 1, xlo, ylo, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 2, xhi, ylo, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xhi, ylo, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			break;
 		case UBLC_FACE_UP:
 			UBLC_tesselator_vertex(buf + 0, xhi, yhi, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 1, xhi, yhi, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 2, xlo, yhi, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xlo, yhi, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			break;
 		case UBLC_FACE_FRONT:
 			UBLC_tesselator_vertex(buf + 0, xlo, yhi, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 1, xhi, yhi, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 2, xhi, ylo, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xlo, ylo, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			break;
 		case UBLC_FACE_BACK:
 			UBLC_tesselator_vertex(buf + 0, xlo, yhi, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 1, xlo, ylo, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 2, xhi, ylo, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xhi, yhi, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			break;
 		case UBLC_FACE_LEFT:
 			UBLC_tesselator_vertex(buf + 0, xlo, yhi, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 1, xlo, yhi, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 2, xlo, ylo, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xlo, ylo, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			break;
 		case UBLC_FACE_RIGHT:
 			UBLC_tesselator_vertex(buf + 0, xhi, ylo, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 1, xhi, ylo, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 2, xhi, yhi, zlo, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xhi, yhi, zhi, 0.0f,
-					0.0f, 1.0f, 1.0f, 1.0f);
+					0.0f, br, br, br);;
 			break;
 	}
 }
