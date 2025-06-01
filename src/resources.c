@@ -19,7 +19,7 @@ __attribute__((constructor)) static void resource_init(void) {
 
 	int res_fd = openat(base, "resources", O_SEARCH | O_DIRECTORY);
 	if (res_fd < 0)
-		err(2, "openat: %i %s", base, path);
+		err(2, "openat: %i %s", base, "resources");
 
 	UBLC_resource_fd = res_fd;
 
