@@ -69,7 +69,8 @@ int main(void) {
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
 
 	window = SDL_CreateWindow("unbloCked", 640, 480, SDL_WINDOW_OPENGL |
-			SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+			SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY |
+			SDL_WINDOW_MOUSE_FOCUS | SDL_WINDOW_INPUT_FOCUS);
 	if (window == NULL)
 		errx(2, "%s", SDL_GetError());
 
