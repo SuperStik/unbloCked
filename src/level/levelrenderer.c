@@ -74,13 +74,8 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	UBLC_frustum_get(frustum);
 
 	size_t totalchunks = (size_t)xchunks * ychunks * zchunks;
-	for (size_t i = 0; i < totalchunks; ++i) {
-		struct UBLC_AABB aabb = chunks[i].aabb;
-		if (UBLC_frustum_hascube(frustum, aabb.x_lo, aabb.y_lo,
-					aabb.z_lo, aabb.x_hi, aabb.y_hi,
-					aabb.z_hi))
-			UBLC_chunk_render(chunks + i, layer);
-	}
+	for (size_t i = 0; i < totalchunks; ++i)
+		UBLC_chunk_render(&(chunks[i]), layer);
 
 	if (layer)
 		return;

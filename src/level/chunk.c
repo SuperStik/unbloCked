@@ -88,8 +88,6 @@ void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
 }
 
 static void rebuild(struct UBLC_chunk *chunk, int layer) {
-	/*glNewList(chunk->_lists + layer, GL_COMPILE);*/
-
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
