@@ -36,57 +36,71 @@ struct UBLC_AABB *UBLC_AABB_grow(struct UBLC_AABB *aabb, float xa, float ya,
 float UBLC_AABB_clipXcollide(const struct UBLC_AABB *restrict aabb, const struct
 		UBLC_AABB *restrict c, float xa) {
 	if (!(c->y_hi > aabb->y_lo && c->y_lo < aabb->y_hi))
-		goto fastreturnx;
+		return xa;
 	if (!(c->z_hi > aabb->z_lo && c->z_lo < aabb->z_hi))
-		goto fastreturnx;
+		return xa;
 
-	float max = aabb->x_lo - c->x_hi - UBLC_AABB_EPSILON;
-	if (xa > 0.0f && c->x_hi <= aabb->x_lo && max < xa)
-		xa = max;
+	float max;
+	if (xa > 0.0f && c->x_hi <= aabb->x_lo) {
+		warnx("col");
+		max = aabb->x_lo - c->x_hi - UBLC_AABB_EPSILON;
+		if (max < xa)
+			xa = max;
+	} else
+		warnx("%g %g", c->x_hi, aabb->x_lo);
 
-	max = aabb->x_hi - c->x_lo + UBLC_AABB_EPSILON;
-	if (xa < 0.0f && c->x_lo >= aabb->x_hi && max > xa)
-		xa = max;
+	if (xa < 0.0f && c->x_lo >= aabb->x_hi) {
+		max = aabb->x_hi - c->x_lo + UBLC_AABB_EPSILON;
+		if (max > xa)
+			xa = max;
+	}
 
-fastreturnx:
 	return xa;
 }
 
 float UBLC_AABB_clipYcollide(const struct UBLC_AABB *restrict aabb, const struct
 		UBLC_AABB *restrict c, float ya) {
 	if (!(c->x_hi > aabb->x_lo && c->x_lo < aabb->x_hi))
-		goto fastreturny;
+		return ya;
 	if (!(c->z_hi > aabb->z_lo && c->z_lo < aabb->z_hi))
-		goto fastreturny;
+		return ya;
 
-	float max = aabb->y_lo - c->y_hi - UBLC_AABB_EPSILON;
-	if (ya > 0.0f && c->y_hi <= aabb->y_lo && max < ya)
-		ya = max;
+	float max;
+	if (ya > 0.0f && c->y_hi <= aabb->y_lo) {
+		max = aabb->y_lo - c->y_hi - UBLC_AABB_EPSILON;
+		if (max < ya)
+			ya = max;
+	}
 
-	max = aabb->y_hi - c->y_lo + UBLC_AABB_EPSILON;
-	if (ya < 0.0f && c->y_lo >= aabb->y_hi && max > ya)
-		ya = max;
+	if (ya < 0.0f && c->y_lo >= aabb->y_hi) {
+		max = aabb->y_hi - c->y_lo + UBLC_AABB_EPSILON;
+		if (max > ya)
+			ya = max;
+	}
 
-fastreturny:
 	return ya;
 }
 
 float UBLC_AABB_clipZcollide(const struct UBLC_AABB *restrict aabb, const struct
 		UBLC_AABB *restrict c, float za) {
 	if (!(c->x_hi > aabb->x_lo && c->x_lo < aabb->x_hi))
-		goto fastreturnz;
+		return za;
 	if (!(c->y_hi > aabb->y_lo && c->y_lo < aabb->y_hi))
-		goto fastreturnz;
+		return za;
 
-	float max = aabb->z_lo - c->z_hi - UBLC_AABB_EPSILON;
-	if (za > 0.0f && c->z_hi <= aabb->z_lo && max < za)
-		za = max;
+	float max;
+	if (za > 0.0f && c->z_hi <= aabb->z_lo) {
+		max = aabb->z_lo - c->z_hi - UBLC_AABB_EPSILON;
+		if (max < za)
+			za = max;
+	}
 
-	max = aabb->z_hi - c->z_lo + UBLC_AABB_EPSILON;
-	if (za < 0.0f && c->z_lo >= aabb->z_hi && max > za)
-		za = max;
+	if (za < 0.0f && c->z_lo >= aabb->z_hi) {
+		max = aabb->z_hi - c->z_lo + UBLC_AABB_EPSILON;
+		if (max > za)
+			za = max;
+	}
 
-fastreturnz:
 	return za;
 }
 
