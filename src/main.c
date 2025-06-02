@@ -102,6 +102,9 @@ int main(void) {
 	if (!SDL_SetWindowRelativeMouseMode(window, true))
 		warnx("%s", SDL_GetError());
 
+	if (!SDL_SetHint(SDL_HINT_MOUSE_RELATIVE_SYSTEM_SCALE, "1"))
+		warnx("%s", SDL_GetError());
+
 	swapwindow = SDL_RegisterEvents(1);
 	if (swapwindow == 0)
 		errx(2, "No user events left", NULL);
