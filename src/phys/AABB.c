@@ -42,12 +42,10 @@ float UBLC_AABB_clipXcollide(const struct UBLC_AABB *restrict aabb, const struct
 
 	float max;
 	if (xa > 0.0f && c->x_hi <= aabb->x_lo) {
-		warnx("col");
 		max = aabb->x_lo - c->x_hi - UBLC_AABB_EPSILON;
 		if (max < xa)
 			xa = max;
-	} else
-		warnx("%g %g", c->x_hi, aabb->x_lo);
+	}
 
 	if (xa < 0.0f && c->x_lo >= aabb->x_hi) {
 		max = aabb->x_hi - c->x_lo + UBLC_AABB_EPSILON;

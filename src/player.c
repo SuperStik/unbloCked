@@ -178,12 +178,17 @@ void UBLC_player_move(struct UBLC_player *ply, float xa, float ya, float za) {
 
 	const struct UBLC_AABB *aabbs = UBLC_level_getcubes(&expanded, &count);
 
-	for (size_t i = 0; i < count; ++i) {
-		ya = UBLC_AABB_clipYcollide(aabbs + i, &(ply->aabb), ya);
+	for (size_t i = 0; i < count; ++i)
 		xa = UBLC_AABB_clipXcollide(aabbs + i, &(ply->aabb), xa);
+	UBLC_AABB_move(&(ply->aabb), xa, 0.0f, 0.0f);
+
+	for (size_t i = 0; i < count; ++i)
+		ya = UBLC_AABB_clipYcollide(aabbs + i, &(ply->aabb), ya);
+	UBLC_AABB_move(&(ply->aabb), 0.0f, ya, 0.0f);
+
+	for (size_t i = 0; i < count; ++i)
 		za = UBLC_AABB_clipZcollide(aabbs + i, &(ply->aabb), za);
-	}
-	UBLC_AABB_move(&(ply->aabb), xa, ya, za);
+	UBLC_AABB_move(&(ply->aabb), 0.0f, 0.0f, za);
 
 	ply->onground = yaOrg != ya && yaOrg < 0.0f;
 
