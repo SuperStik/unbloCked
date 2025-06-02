@@ -16,3 +16,6 @@ The project is built by running `make` in the main directory.
 ## Issues
 
 There is still quite a bit of thread-unsafe code, notably in the player files, and that still needs to be fixed. Report any other bugs in the [issues tab](https://github.com/SuperStik/unbloCked/issues).
+
+## Legal Junk
+I do not take credit for the textures or original code. Textures and original code are owned by Mojang Studios.
