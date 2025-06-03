@@ -4,6 +4,7 @@ SRC_DIR := src
 SRC := $(wildcard ${SRC_DIR}/*.c)
 SRC += $(wildcard ${SRC_DIR}/phys/*.c)
 SRC += $(wildcard ${SRC_DIR}/level/*.c)
+SRC += $(wildcard ${SRC_DIR}/character/*.c)
 RES := resources
 # TODO: make sure the base name has at least one character
 RES_SRC := $(shell find ${RES}/ -name '*.*')
@@ -63,6 +64,7 @@ ${OBJ_DIR}:
 	mkdir -p $@
 	mkdir $@/phys
 	mkdir $@/level
+	mkdir $@/character
 
 ${GLSL_DIR}:
 	mkdir -p $@

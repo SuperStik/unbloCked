@@ -11,6 +11,7 @@
 #include <SDL3/SDL_opengl.h>
 
 #include "anon_sem.h"
+#include "character/zombie.h"
 #include "chronos.h"
 #include "gutl.h"
 #include "level/chunk.h"
@@ -111,6 +112,7 @@ int main(void) {
 		errx(2, "No user events left", NULL);
 
 	UBLC_chunk_initstatic();
+	UBLC_zombie_initstatic();
 
 	if (UBLC_level_new(256, 256, 64))
 		return 2;
@@ -184,7 +186,8 @@ int main(void) {
 	h /= 2;
 	SDL_WarpMouseInWindow(window, w, h);
 
-	//SDL_GL_MakeCurrent(window, gl_context);
+	SDL_GL_MakeCurrent(window, gl_context);
+	UBLC_zombie_destroystatic();
 
 	SDL_GL_DestroyContext(gl_context);
 
