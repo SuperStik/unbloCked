@@ -54,6 +54,9 @@ static char done = 0;
 
 static struct UBLC_player player;
 
+#define ZOMBIE_COUNT 100
+static struct UBLC_zombie zombies[ZOMBIE_COUNT];
+
 int main(void) {
 	srand48(time(NULL));
 	puts("Hello unbloCked!");
@@ -322,6 +325,11 @@ static void *render(void *i) {
 		UBLC_levelrenderer_render(&player, 0);
 		glDisable(GL_TEXTURE_2D);
 
+		pthread_mutex_lock(&interpmut);
+		for (int i = 0; i < ZOMBIE_COUNT; ++i)
+			UBLC_zombie_render(zombies + i, a);
+		pthread_mutex_unlock(&interpmut);
+
 		glDisable(GL_POLYGON_SMOOTH);
 
 		__atomic_add_fetch(&frames, 1, __ATOMIC_RELAXED);
@@ -339,11 +347,16 @@ static void *tick(void *_) {
 	pthread_setname_np("unbloCked.tick");
 	pthread_set_qos_class_self_np(QOS_CLASS_USER_INITIATED, 0);
 
+	for (int i = 0; i < ZOMBIE_COUNT; ++i)
+		UBLC_zombie_init(zombies + i, 128.0f, 0.0f, 128.0f);
+
 	while (!done) {
 		struct timespec start;
 		UBLC_chronos_initialtime(&start);
 
 		UBLC_player_tick(&player);
+		for (int i = 0; i < ZOMBIE_COUNT; ++i)
+			UBLC_zombie_tick(zombies + i);
 
 		float interp;
 		UBLC_chronos_sleeprate(&start, 60, &interp);
@@ -354,6 +367,9 @@ static void *tick(void *_) {
 
 		pthread_mutex_unlock(&interpmut);
 	}
+
+	for (int i = 0; i < ZOMBIE_COUNT; ++i)
+		UBLC_zombie_delete(zombies + i);
 
 	return NULL;
 }

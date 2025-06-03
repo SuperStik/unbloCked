@@ -1,6 +1,7 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <err.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include <SDL3/SDL_opengl.h>
 #include <SDL3/SDL_opengl_glext.h>
@@ -84,11 +85,50 @@ struct UBLC_zombie *UBLC_zombie_init(struct UBLC_zombie *zom, float x, float y,
 	zom->ent.y = y;
 	zom->ent.z = z;
 
+	zom->timeoffs = (float)(drand48() * 1239813.0);
+	zom->rot = (float)(drand48() * M_PI * 2.0);
+	zom->speed = 1.0f;
+	zom->rot_a = (float)(drand48() + 1.0) * 0.01f;
+
 	return zom;
 }
 
 void UBLC_zombie_delete(struct UBLC_zombie *zom) {
 	UBLC_entity_delete(&(zom->ent));
+}
+
+void UBLC_zombie_tick(struct UBLC_zombie *zom) {
+	UBLC_entity_tick(&(zom->ent));
+
+	float xa;
+	float ya;
+
+	zom->rot += zom->rot_a;
+	zom->rot_a *= 0.99f;
+	zom->rot_a += (float)((drand48() - drand48()) * drand48() * drand48() *
+			0.01);
+
+	__sincosf(zom->rot, &xa, &ya);
+
+	if (zom->ent.onground && drand48() < 0.01)
+		zom->ent.yd = 0.12f;
+
+	UBLC_entity_moverelative(&(zom->ent), xa, ya, zom->ent.onground ? 0.02f
+			: 0.005f);
+	zom->ent.yd -= 0.005f;
+	UBLC_entity_move(&(zom->ent), zom->ent.xd, zom->ent.yd, zom->ent.zd);
+
+	zom->ent.xd *= 0.91f;
+	zom->ent.yd *= 0.98f;
+	zom->ent.zd *= 0.91f;
+
+	if (zom->ent.y > 100.0f)
+		UBLC_entity_resetpos(&(zom->ent));
+
+	if (zom->ent.onground) {
+		zom->ent.xd *= 0.8f;
+		zom->ent.yd *= 0.8f;
+	}
 }
 
 void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
