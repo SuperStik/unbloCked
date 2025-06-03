@@ -1,8 +1,5 @@
 #include <err.h>
 #include <math.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
 
 #include "gccvec.h"
 #include "level/level.h"

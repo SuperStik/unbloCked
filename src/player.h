@@ -3,8 +3,6 @@
 
 #include <entity.h>
 
-#include "phys/AABB.h"
-
 #define UBLC_KF_UP (1 << 0)
 #define UBLC_KF_DOWN (1 << 1)
 #define UBLC_KF_LEFT (1 << 2)
