@@ -138,5 +138,3 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	if (oneshotkeys)
 		UBLC_player_unsetkeys(ply, oneshotkeys);
 }
-
-
