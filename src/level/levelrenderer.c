@@ -82,13 +82,13 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 
 	int xlo, ylo, zlo, xhi, yhi, zhi;
 	char selected, facing;
-	pthread_rwlock_rdlock(&(player->lock));
+	pthread_rwlock_rdlock(&(player->ent.lock));
 	xlo = player->xb;
 	ylo = player->yb;
 	zlo = player->zb;
 	selected = player->hasselect;
 	facing = player->placeface;
-	pthread_rwlock_unlock(&(player->lock));
+	pthread_rwlock_unlock(&(player->ent.lock));
 
 	if (!selected)
 		return;

@@ -247,16 +247,16 @@ static void movecameratoplayer(void) {
 	glTranslatef(0.0f, 0.0f, -0.3f);
 
 	float pitch, yaw;
-	UBLC_player_getangles(&player, &pitch, &yaw);
+	UBLC_entity_getangles(&(player.ent), &pitch, &yaw);
 
 	glRotatef(pitch, 1.0f, 0.0f, 0.0f);
 	glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 
 	pthread_mutex_lock(&interpmut);
 
-	float x = player.xo + (player.x - player.xo) * a;
-	float y = player.yo + (player.y - player.yo) * a;
-	float z = player.zo + (player.z - player.zo) * a;
+	float x = player.ent.xo + (player.ent.x - player.ent.xo) * a;
+	float y = player.ent.yo + (player.ent.y - player.ent.yo) * a;
+	float z = player.ent.zo + (player.ent.z - player.ent.zo) * a;
 
 	pthread_mutex_unlock(&interpmut);
 
@@ -456,7 +456,7 @@ static void keyevent_up_handler(SDL_KeyboardEvent *key, SDL_Window *window) {
 
 static void mousemotionevent_handler(SDL_MouseMotionEvent *motion,
 		SDL_Window *window) {
-	UBLC_player_turn(&player, motion->xrel, motion->yrel);
+	UBLC_entity_turn(&(player.ent), motion->xrel, motion->yrel);
 }
 
 static void mousedown_handler(SDL_MouseButtonEvent *button, SDL_Window *window)
@@ -464,10 +464,10 @@ static void mousedown_handler(SDL_MouseButtonEvent *button, SDL_Window *window)
 	unsigned x, y, z, f;
 	switch(button->button) {
 		case SDL_BUTTON_LEFT:
-			pthread_rwlock_rdlock(&(player.lock));
+			pthread_rwlock_rdlock(&(player.ent.lock));
 
 			if (!player.hasselect) {
-				pthread_rwlock_unlock(&(player.lock));
+				pthread_rwlock_unlock(&(player.ent.lock));
 				return;
 			}
 
@@ -475,16 +475,16 @@ static void mousedown_handler(SDL_MouseButtonEvent *button, SDL_Window *window)
 			y = player.yb;
 			z = player.zb;
 
-			pthread_rwlock_unlock(&(player.lock));
+			pthread_rwlock_unlock(&(player.ent.lock));
 
 			UBLC_level_settile(x, y, z, 0);
 
 			break;
 		case SDL_BUTTON_RIGHT:
-			pthread_rwlock_rdlock(&(player.lock));
+			pthread_rwlock_rdlock(&(player.ent.lock));
 
 			if (!player.hasselect) {
-				pthread_rwlock_unlock(&(player.lock));
+				pthread_rwlock_unlock(&(player.ent.lock));
 				return;
 			}
 
@@ -493,7 +493,7 @@ static void mousedown_handler(SDL_MouseButtonEvent *button, SDL_Window *window)
 			z = player.zb;
 			f = player.placeface;
 
-			pthread_rwlock_unlock(&(player.lock));
+			pthread_rwlock_unlock(&(player.ent.lock));
 
 			switch(f) {
 				case 0:
