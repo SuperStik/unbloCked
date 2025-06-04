@@ -9,6 +9,7 @@
 #include <SDL3/SDL_timer.h>
 
 #include "cube.h"
+#include "../level/level.h"
 #include "../textures.h"
 #include "zombie.h"
 
@@ -200,6 +201,10 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 	cubes[LEGL].pitch = sintbl[1] * 1.4f;
 	cubes[LEGR].pitch = -sintbl[1] * 1.4f;
 
+	float br = UBLC_level_getbrightness(zom->ent.x, zom->ent.y, zom->ent.z);
+	br *= br;
+
+	glColor3f(br, br, br);
 	for (int i = 0; i < 6; ++i)
 		UBLC_cube_render(cubes + i, model[i]);
 
