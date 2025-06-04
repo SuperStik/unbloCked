@@ -145,10 +145,12 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 #if SIMD_COMPILER_HAS_REQUIRED_FEATURES
 	simd_float4 params = {
 		curtime,
-		curtime * 0.6662f,
-		curtime * 0.83f,
-		curtime * 0.2312f
+		curtime,
+		curtime,
+		curtime
 	};
+	simd_float4 parammul = {1.0f, 0.6662f, 0.83f, 0.2312f};
+	params *= parammul;
 
 	simd_float4 sins = sin(params);
 
