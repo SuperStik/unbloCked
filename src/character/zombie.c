@@ -1,6 +1,7 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <err.h>
 #include <math.h>
+#include <simd/math.h>
 #include <stdlib.h>
 
 #include <SDL3/SDL_opengl.h>
@@ -141,6 +142,24 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 		zom->timeoffs;
 	float size= 1.0f/20.0f;
 	/* TODO: don't use magic numbers */
+#if SIMD_COMPILER_HAS_REQUIRED_FEATURES
+	simd_float4 params = {
+		curtime,
+		curtime * 0.6662f,
+		curtime * 0.83f,
+		curtime * 0.2312f
+	};
+
+	simd_float4 sins = sin(params);
+
+	float sintbl[5] = {
+		sins.x,
+		sins.y,
+		sins.z,
+		sins.w,
+		sin(curtime * 0.2312f)
+	};
+#else
 	float sintbl[5] = {
 		sinf(curtime),
 		sinf(curtime * 0.6662f),
@@ -148,6 +167,8 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 		sinf(curtime * 0.2312f),
 		sinf(curtime * 0.2812f)
 	};
+#endif /* SIMD_COMPILER_HAS_REQUIRED_FEATURES */
+
 	float yy = fabsf(sintbl[1]) / 4.0f;
 
 	glTranslatef(
