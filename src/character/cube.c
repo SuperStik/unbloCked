@@ -18,6 +18,13 @@ void UBLC_cube_genbox(struct UBLC_vbuffer buf[24], float xlo, float ylo, float
 	float yhi = ylo + h;
 	float zhi = zlo + d;
 
+	float w32 = w / 32.0f;
+	float h32 = h / 32.0f;
+	float d32 = d / 32.0f;
+	float w64 = w / 64.0f;
+	float h64 = h / 64.0f;
+	float d64 = d / 64.0f;
+
 	struct UBLC_vbuffer verts[8] = {
 		{xlo, ylo, zlo},
 		{xhi, ylo, zlo},
@@ -29,47 +36,41 @@ void UBLC_cube_genbox(struct UBLC_vbuffer buf[24], float xlo, float ylo, float
 		{xlo, yhi, zhi}
 	};
 
-	buf[0] = verts[5];
-	buf[1] = verts[1];
-	buf[2] = verts[2];
-	buf[3] = verts[6];
-	polygon(&(buf[0]), texUoffs + d + w, texVoffs + d, texUoffs + d + w + d,
-			texVoffs + d + h);
+	buf[3] = verts[5];
+	buf[2] = verts[1];
+	buf[1] = verts[2];
+	buf[0] = verts[6];
+	polygon(&(buf[0]), texUoffs + d64 + w64, texVoffs + d32, texUoffs + d64 + w64 + d64, texVoffs + d32 + h32);
 
-	buf[4] = verts[0];
-	buf[5] = verts[4];
-	buf[6] = verts[7];
-	buf[7] = verts[3];
-	polygon(&(buf[4]), texUoffs, texVoffs + d, texUoffs + d + w, texVoffs +
-			d);
+	buf[7] = verts[0];
+	buf[6] = verts[4];
+	buf[5] = verts[7];
+	buf[4] = verts[3];
+	polygon(&(buf[4]), texUoffs, texVoffs + d32, texUoffs + d64, texVoffs + d32 + h32);
 
-	buf[8] = verts[5];
-	buf[9] = verts[4];
-	buf[10] = verts[0];
-	buf[11] = verts[1];
-	polygon(&(buf[8]), texUoffs + d, texVoffs, texUoffs + d + w, texVoffs +
-			d);
+	buf[11] = verts[5];
+	buf[10] = verts[4];
+	buf[9] = verts[0];
+	buf[8] = verts[1];
+	polygon(&(buf[8]), texUoffs + d64, texVoffs, texUoffs + d64 + w64, texVoffs + d32);
 
-	buf[12] = verts[2];
-	buf[13] = verts[3];
-	buf[14] = verts[7];
-	buf[15] = verts[6];
-	polygon(&(buf[12]), texUoffs + d + w, texVoffs, texUoffs + d + w,
-			texVoffs + d);
+	buf[15] = verts[2];
+	buf[14] = verts[3];
+	buf[13] = verts[7];
+	buf[12] = verts[6];
+	polygon(&(buf[12]), texUoffs + d64 + w64, texVoffs, texUoffs + d64 + w64 + w64, texVoffs + d32);
 
-	buf[16] = verts[1];
-	buf[17] = verts[0];
-	buf[18] = verts[3];
-	buf[19] = verts[2];
-	polygon(&(buf[16]), texUoffs + d, texVoffs + d, texUoffs + d + w,
-			texVoffs + d + h);
+	buf[19] = verts[1];
+	buf[18] = verts[0];
+	buf[17] = verts[3];
+	buf[16] = verts[2];
+	polygon(&(buf[16]), texUoffs + d64, texVoffs + d32, texUoffs + d64 + w64, texVoffs + d32 + h32);
 
-	buf[20] = verts[4];
-	buf[21] = verts[5];
-	buf[22] = verts[6];
-	buf[23] = verts[7];
-	polygon(&(buf[20]), texUoffs + d + w + d, texVoffs + d, texUoffs + d + w
-			+ d, texVoffs + d + h);
+	buf[23] = verts[4];
+	buf[22] = verts[5];
+	buf[21] = verts[6];
+	buf[20] = verts[7];
+	polygon(&(buf[20]), texUoffs + d64 + w64 + d64, texVoffs + d32, texUoffs + d64 + w64 + d64 + w64, texVoffs + d32 + h32);
 }
 
 void UBLC_cube_render(const struct UBLC_cube *cube, unsigned buf) {
@@ -101,14 +102,14 @@ void UBLC_cube_render(const struct UBLC_cube *cube, unsigned buf) {
 static void polygon(struct UBLC_vbuffer buf[4], float ulo, float vlo, float uhi,
 		float vhi) {
 	buf[0].u = uhi;
-	buf[0].v = vlo;
+	buf[0].v = vhi;
 
 	buf[1].u = ulo;
-	buf[1].v = vlo;
+	buf[1].v = vhi;
 
 	buf[2].u = ulo;
-	buf[2].v = vhi;
+	buf[2].v = vlo;
 
 	buf[3].u = uhi;
-	buf[3].v = vhi;
+	buf[3].v = vlo;
 }

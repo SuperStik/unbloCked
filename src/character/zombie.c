@@ -24,9 +24,10 @@ static unsigned skin;
 static unsigned model[6];
 
 void UBLC_zombie_initstatic(void) {
-	long tex = UBLC_textures_loadtexture("textures/char.png", GL_NEAREST);
+	const char *texstr = "textures/char.png";
+	long tex = UBLC_textures_loadtexture(texstr, GL_NEAREST);
 	if (tex < 0)
-		errx(2, "Cannot allocate texture");
+		errx(2, "Cannot allocate texture: %s", texstr);
 
 	skin = tex;
 
@@ -40,32 +41,32 @@ void UBLC_zombie_initstatic(void) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 24, buf,
 			GL_STATIC_DRAW);
 
-	UBLC_cube_genbox(buf, -4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, 16.0f,
-			16.0f);
+	UBLC_cube_genbox(buf, -4.0f, 0.0f, -2.0f, 8.0f, 12.0f, 4.0f, 0.25f,
+			0.5f);
 	glBindBuffer(GL_ARRAY_BUFFER, model[BODY]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 24, buf,
 			GL_STATIC_DRAW);
 
-	UBLC_cube_genbox(buf, -3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, 40.0f,
-			16.0f);
+	UBLC_cube_genbox(buf, -3.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, 0.625f,
+			0.5f);
 	glBindBuffer(GL_ARRAY_BUFFER, model[ARML]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 24, buf,
 			GL_STATIC_DRAW);
 
-	UBLC_cube_genbox(buf, -1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, 40.0f,
-			16.0f);
+	UBLC_cube_genbox(buf, -1.0f, -2.0f, -2.0f, 4.0f, 12.0f, 4.0f, 0.625f,
+			0.5f);
 	glBindBuffer(GL_ARRAY_BUFFER, model[ARMR]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 24, buf,
 			GL_STATIC_DRAW);
 
 	UBLC_cube_genbox(buf, -2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, 0.0f,
-			16.0f);
+			0.5f);
 	glBindBuffer(GL_ARRAY_BUFFER, model[LEGL]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 24, buf,
 			GL_STATIC_DRAW);
 	
 	UBLC_cube_genbox(buf, -2.0f, 0.0f, -2.0f, 4.0f, 12.0f, 4.0f, 0.0f,
-			16.0f);
+			0.5f);
 	glBindBuffer(GL_ARRAY_BUFFER, model[LEGR]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * 24, buf,
 			GL_STATIC_DRAW);
@@ -138,7 +139,7 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 	glPushMatrix();
 	float curtime = (float)(SDL_GetTicks() % 36000) / 100.0f * zom->speed +
 		zom->timeoffs;
-	float size= 7.0f/120.0f;
+	float size= 1.0f/20.0f;
 	/* TODO: don't use magic numbers */
 	float sintbl[5] = {
 		sinf(curtime),
@@ -147,16 +148,15 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 		sinf(curtime * 0.2312f),
 		sinf(curtime * 0.2812f)
 	};
-	float yy = -fabsf(sintbl[1]) * 5.0f - 23.0f;
+	float yy = fabsf(sintbl[1]) / 4.0f;
 
 	glTranslatef(
 			zom->ent.xo + (zom->ent.x - zom->ent.xo) * a,
-			zom->ent.yo + (zom->ent.y - zom->ent.yo) * a,
+			zom->ent.yo + (zom->ent.y - zom->ent.yo) * a + yy,
 			zom->ent.zo + (zom->ent.z - zom->ent.zo) * a
 		    );
 	glScalef(1.0f, -1.0f, 1.0f);
 	glScalef(size, size, size);
-	glTranslatef(0.0f, yy, 0.0f);
 	glRotatef(zom->rot * RAD2DEG + 180.0f, 0.0f, 1.0f, 0.0f);
 
 	struct UBLC_cube cubes[6] = {

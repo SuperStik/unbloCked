@@ -129,6 +129,7 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 	*width = w;
 	*height = h;
 
+
 	*internalformat = typepng2gl(bit_depth, color_type, format);
 
 	if (setjmp(png_jmpbuf(png_reader))) {
@@ -140,8 +141,24 @@ static int readpng(FILE *infile, long *width, long *height, int *internalformat,
 
 	size_t rowbytes = png_get_rowbytes(png_reader, png_info);
 
-	if (color_type == PNG_COLOR_TYPE_PALETTE)
-		rowbytes *= 3;
+	/* hack to support paletted PNGs with alpha channel */
+	char has_trans = 0;
+	if (color_type == PNG_COLOR_TYPE_PALETTE) {
+		png_bytep trans = NULL;
+		int num_trans = 0;
+		png_color_16p trans_values = NULL;
+
+		/* not sure if these need to be freed somewhere */
+		png_get_tRNS(png_reader, png_info, &trans, &num_trans,
+				&trans_values);
+		if (trans != NULL) {
+			rowbytes *= 4;
+			has_trans = 1;
+			*internalformat = GL_RGBA8;
+			*format = GL_RGBA;
+		} else
+			rowbytes *= 3;
+	}
 
 	*image = malloc((*height) * sizeof(png_bytep) * rowbytes);
 	if (*image == NULL) {
