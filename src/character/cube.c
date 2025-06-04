@@ -40,37 +40,43 @@ void UBLC_cube_genbox(struct UBLC_vbuffer buf[24], float xlo, float ylo, float
 	buf[2] = verts[1];
 	buf[1] = verts[2];
 	buf[0] = verts[6];
-	polygon(&(buf[0]), texUoffs + d64 + w64, texVoffs + d32, texUoffs + d64 + w64 + d64, texVoffs + d32 + h32);
+	polygon(&(buf[0]), texUoffs + d64 + w64, texVoffs + d32, texUoffs + d64
+			+ w64 + d64, texVoffs + d32 + h32);
 
 	buf[7] = verts[0];
 	buf[6] = verts[4];
 	buf[5] = verts[7];
 	buf[4] = verts[3];
-	polygon(&(buf[4]), texUoffs, texVoffs + d32, texUoffs + d64, texVoffs + d32 + h32);
+	polygon(&(buf[4]), texUoffs, texVoffs + d32, texUoffs + d64, texVoffs +
+			d32 + h32);
 
 	buf[11] = verts[5];
 	buf[10] = verts[4];
 	buf[9] = verts[0];
 	buf[8] = verts[1];
-	polygon(&(buf[8]), texUoffs + d64, texVoffs, texUoffs + d64 + w64, texVoffs + d32);
+	polygon(&(buf[8]), texUoffs + d64, texVoffs, texUoffs + d64 + w64,
+			texVoffs + d32);
 
 	buf[15] = verts[2];
 	buf[14] = verts[3];
 	buf[13] = verts[7];
 	buf[12] = verts[6];
-	polygon(&(buf[12]), texUoffs + d64 + w64, texVoffs, texUoffs + d64 + w64 + w64, texVoffs + d32);
+	polygon(&(buf[12]), texUoffs + d64 + w64, texVoffs, texUoffs + d64 + w64
+			+ w64, texVoffs + d32);
 
 	buf[19] = verts[1];
 	buf[18] = verts[0];
 	buf[17] = verts[3];
 	buf[16] = verts[2];
-	polygon(&(buf[16]), texUoffs + d64, texVoffs + d32, texUoffs + d64 + w64, texVoffs + d32 + h32);
+	polygon(&(buf[16]), texUoffs + d64, texVoffs + d32, texUoffs + d64 +
+			w64, texVoffs + d32 + h32);
 
 	buf[23] = verts[4];
 	buf[22] = verts[5];
 	buf[21] = verts[6];
 	buf[20] = verts[7];
-	polygon(&(buf[20]), texUoffs + d64 + w64 + d64, texVoffs + d32, texUoffs + d64 + w64 + d64 + w64, texVoffs + d32 + h32);
+	polygon(&(buf[20]), texUoffs + d64 + w64 + d64, texVoffs + d32, texUoffs
+			+ d64 + w64 + d64 + w64, texVoffs + d32 + h32);
 }
 
 void UBLC_cube_render(const struct UBLC_cube *cube, unsigned buf) {
