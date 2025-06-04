@@ -3,6 +3,9 @@
 
 #include <player.h>
 
+void UBLC_levelrenderer_initstatic(void);
+void UBLC_levelrenderer_destroystatic(void);
+
 void UBLC_levelrenderer_init(void);
 void UBLC_levelrenderer_delete(void);
 

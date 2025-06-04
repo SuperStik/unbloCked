@@ -12,6 +12,7 @@
 #include "level.h"
 #include <phys/AABB.h>
 #include "tesselator.h"
+#include "textures.h"
 #include "tile.h"
 
 static struct UBLC_chunk *chunks;
@@ -21,6 +22,20 @@ static unsigned ychunks;
 static unsigned zchunks;
 
 static unsigned selectbuffer;
+static unsigned terrain;
+
+void UBLC_levelrenderer_initstatic(void) {
+	const char *texstr = "textures/terrain.png";
+	long tex = UBLC_textures_loadtexture(texstr, GL_NEAREST);
+	if (tex < 0)
+		err(2, "Cannot allocate texture: %s", texstr);
+
+	terrain = tex;
+}
+
+void UBLC_levelrenderer_destroystatic(void) {
+	glDeleteTextures(1, &terrain);
+}
 
 void UBLC_levelrenderer_init(void) {
 	xchunks = UBLC_level_width / CHUNK_SIZE;
@@ -73,9 +88,12 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	gvec(float,4) frustum[6];
 	UBLC_frustum_get(frustum);
 
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, terrain);
 	size_t totalchunks = (size_t)xchunks * ychunks * zchunks;
 	for (size_t i = 0; i < totalchunks; ++i)
 		UBLC_chunk_render(&(chunks[i]), layer);
+	glDisable(GL_TEXTURE_2D);
 
 	if (layer)
 		return;

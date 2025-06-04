@@ -114,7 +114,7 @@ int main(void) {
 	if (swapwindow == 0)
 		errx(2, "No user events left", NULL);
 
-	UBLC_chunk_initstatic();
+	UBLC_levelrenderer_initstatic();
 	UBLC_zombie_initstatic();
 
 	if (UBLC_level_new(256, 256, 64))
@@ -190,6 +190,7 @@ int main(void) {
 	SDL_WarpMouseInWindow(window, w, h);
 
 	SDL_GL_MakeCurrent(window, gl_context);
+	UBLC_levelrenderer_destroystatic();
 	UBLC_zombie_destroystatic();
 
 	SDL_GL_DestroyContext(gl_context);

@@ -17,11 +17,6 @@ static void rebuild(struct UBLC_chunk *, int layer);
 
 unsigned UBLC_chunk_updates = 0;
 static struct UBLC_vbuffer cpuvbo[BUFFER_COUNT];
-static long texture = -1;
-
-void UBLC_chunk_initstatic(void) {
-	texture = UBLC_textures_loadtexture("textures/terrain.png", GL_NEAREST);
-}
 
 void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	pthread_mutex_lock(&(chunk->lock));
@@ -39,16 +34,11 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnableClientState(GL_COLOR_ARRAY);
 
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
 	GLenum glerr = glGetError();
 	if (glerr)
 		warnx("glBindBuffer: %s", GUTL_errorstr(glerr));
 
-	/* TODO: fix this! */
 	glVertexPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, x));
 	glTexCoordPointer(2, GL_FLOAT, sizeof(struct UBLC_vbuffer),
@@ -57,8 +47,6 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 			(void *)offsetof(struct UBLC_vbuffer, r));
 
 	glDrawArrays(GL_QUADS, 0, chunk->indices[layer]);
-
-	glDisable(GL_TEXTURE_2D);
 
 	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -109,7 +97,6 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 
 	UBLC_level_unlock();
 
-	glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);	
 	glBufferData(GL_ARRAY_BUFFER, sizeof(struct UBLC_vbuffer) * bufcount,
 			cpuvbo, GL_STATIC_DRAW);
