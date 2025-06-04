@@ -125,7 +125,7 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 	zom->ent.yd *= 0.98f;
 	zom->ent.zd *= 0.91f;
 
-	if (zom->ent.y > 100.0f)
+	if (zom->ent.y > 100.0f || zom->ent.y < 0.0f)
 		UBLC_entity_resetpos(&(zom->ent));
 
 	if (zom->ent.onground) {
