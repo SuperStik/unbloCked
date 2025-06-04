@@ -103,19 +103,19 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 	UBLC_entity_tick(&(zom->ent));
 
 	float xa;
-	float ya;
+	float za;
 
 	zom->rot += zom->rot_a;
 	zom->rot_a *= 0.99f;
 	zom->rot_a += (float)((drand48() - drand48()) * drand48() * drand48() *
 			0.01);
 
-	__sincosf(zom->rot, &xa, &ya);
+	__sincosf(zom->rot, &xa, &za);
 
 	if (zom->ent.onground && drand48() < 0.01)
 		zom->ent.yd = 0.12f;
 
-	UBLC_entity_moverelative(&(zom->ent), xa, ya, zom->ent.onground ? 0.02f
+	UBLC_entity_moverelative(&(zom->ent), xa, za, zom->ent.onground ? 0.02f
 			: 0.005f);
 	zom->ent.yd -= 0.005f;
 	UBLC_entity_move(&(zom->ent), zom->ent.xd, zom->ent.yd, zom->ent.zd);
@@ -129,7 +129,7 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 
 	if (zom->ent.onground) {
 		zom->ent.xd *= 0.8f;
-		zom->ent.yd *= 0.8f;
+		zom->ent.zd *= 0.8f;
 	}
 }
 
@@ -138,7 +138,7 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 	glBindTexture(GL_TEXTURE_2D, skin);
 
 	glPushMatrix();
-	float curtime = (float)(SDL_GetTicks() % 36000) / 100.0f * zom->speed +
+	float curtime = (float)SDL_GetTicks() / 100.0f * zom->speed +
 		zom->timeoffs;
 	float size= 1.0f/20.0f;
 	/* TODO: don't use magic numbers */
@@ -178,8 +178,7 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 			zom->ent.yo + (zom->ent.y - zom->ent.yo) * a + yy,
 			zom->ent.zo + (zom->ent.z - zom->ent.zo) * a
 		    );
-	glScalef(1.0f, -1.0f, 1.0f);
-	glScalef(size, size, size);
+	glScalef(size, -size, size);
 	glRotatef(zom->rot * RAD2DEG + 180.0f, 0.0f, 1.0f, 0.0f);
 
 	struct UBLC_cube cubes[6] = {
