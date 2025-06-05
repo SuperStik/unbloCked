@@ -38,6 +38,8 @@ static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
 
+static void setupfog(int fog);
+
 static size_t frames = 0;
 
 static pthread_mutex_t interpmut = PTHREAD_MUTEX_INITIALIZER;
@@ -306,6 +308,9 @@ static void *render(void *i) {
 
 	pthread_set_qos_class_self_np(QOS_CLASS_USER_INTERACTIVE, 1);
 
+	glEnable(GL_FOG);
+	glFogi(GL_FOG_MODE, GL_EXP);
+
 	while (!done) {
 		anon_sem_wait(swapsem);
 
@@ -317,13 +322,12 @@ static void *render(void *i) {
 
 		glEnable(GL_POLYGON_SMOOTH);
 
-		glEnable(GL_FOG);
-		glFogi(GL_FOG_MODE, GL_EXP);
-		glFogf(GL_FOG_DENSITY, 0.2f);
-		glFogfv(GL_FOG_COLOR, fogcolor);
+		setupfog(1);
 		UBLC_levelrenderer_render(&player, 1);
-		glDisable(GL_FOG);
+
+		setupfog(0);
 		UBLC_levelrenderer_render(&player, 0);
+
 		glDisable(GL_TEXTURE_2D);
 
 		pthread_mutex_lock(&interpmut);
@@ -542,6 +546,41 @@ static void mousedown_handler(SDL_MouseButtonEvent *button, SDL_Window *window)
 
 			UBLC_level_settile(x, y, z, 1);
 
+			break;
+	}
+}
+
+static void setupfog(int fog) {
+	switch(fog) {
+		case 0:
+			glFogf(GL_FOG_DENSITY, 0.001f);
+
+			const float color0[4] = {
+				254.0f / 255.0f,
+				251.0f / 255.0f,
+				250.0f / 255.0f,
+				1.0f
+			};
+			glFogfv(GL_FOG_COLOR, color0);
+
+			glDisable(GL_LIGHTING);
+			break;
+		case 1:
+			glFogf(GL_FOG_DENSITY, 0.06f);
+
+			const float color1[4] = {
+				14.0f / 255.0f,
+				11.0f / 255.0f,
+				10.0f / 255.0f,
+				1.0f
+			};
+			glFogfv(GL_FOG_COLOR, color1);
+
+			glEnable(GL_LIGHTING);
+			glEnable(GL_COLOR_MATERIAL);
+
+			const float light[4] = {0.6f, 0.6f, 0.6f, 1.0f};
+			glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light);
 			break;
 	}
 }
