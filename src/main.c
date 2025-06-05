@@ -54,7 +54,7 @@ static char done = 0;
 
 static struct UBLC_player player;
 
-#define ZOMBIE_COUNT 100
+#define ZOMBIE_COUNT 10
 static struct UBLC_zombie zombies[ZOMBIE_COUNT];
 
 int main(void) {
