@@ -8,7 +8,7 @@ static struct timespec diff_timespec(const struct timespec *start, const struct
 		timespec *end);
 
 int UBLC_chronos_initialtime(struct timespec *start) {
-	return clock_gettime(CLOCK_THREAD_CPUTIME_ID, start);
+	return clock_gettime(CLOCK_UPTIME_RAW, start);
 }
 
 int UBLC_chronos_sleeprate(const struct timespec *start, unsigned rate,
