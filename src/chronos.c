@@ -64,14 +64,12 @@ int UBLC_chronos_sleeprate(unsigned rate) {
 }
 
 float UBLC_chronos_getdelta(void) {
-	struct timespec tickstart = UBLC_chronos_getstart();
-
 	struct timespec lerp;
 	UBLC_chronos_gettime(&lerp);
 
-	struct timespec diff = diff_timespec(&tickstart, &lerp);
-
 	pthread_rwlock_rdlock(&deltalock);
+
+	struct timespec diff = diff_timespec(&starttime, &lerp);
 
 	float tickdelta = delta;
 
