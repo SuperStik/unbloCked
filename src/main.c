@@ -29,8 +29,8 @@ static void *tick(void *_);
 static void *framerate(void *_);
 
 static int translatekey(SDL_Keycode);
-static void movecameratoplayer(float d);
-static void setupcamera(float d);
+static void movecameratoplayer(void);
+static void setupcamera(void);
 
 static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
@@ -41,10 +41,6 @@ static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
 static void setupfog(int fog);
 
 static size_t frames = 0;
-
-static pthread_mutex_t interpmut = PTHREAD_MUTEX_INITIALIZER;
-static struct timespec tickstart = {.tv_sec = 0, .tv_nsec = 0};
-static float tickdelta;
 
 static uint32_t swapwindow;
 
@@ -253,7 +249,7 @@ static int translatekey(SDL_Keycode key) {
 	return plykey;
 }
 
-static void movecameratoplayer(float d) {
+static void movecameratoplayer(void) {
 	glTranslatef(0.0f, 0.0f, -0.3f);
 
 	float pitch, yaw;
@@ -265,6 +261,8 @@ static void movecameratoplayer(float d) {
 	struct UBLC_entity_pos pos;
 	UBLC_entity_getrenderpos(&player.ent, &pos);
 
+	float d = UBLC_chronos_getdelta();
+
 	float x = pos.xo + (pos.x - pos.xo) * d;
 	float y = pos.yo + (pos.y - pos.yo) * d;
 	float z = pos.zo + (pos.z - pos.zo) * d;
@@ -272,7 +270,7 @@ static void movecameratoplayer(float d) {
 	glTranslatef(-x, -y, -z);
 }
 
-static void setupcamera(float d) {
+static void setupcamera(void) {
 	glMatrixMode(GL_PROJECTION);
 
 	float matrix[16];
@@ -281,7 +279,7 @@ static void setupcamera(float d) {
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	movecameratoplayer(d);
+	movecameratoplayer();
 }
 
 static void *render(void *i) {
@@ -314,15 +312,9 @@ static void *render(void *i) {
 	while (!done) {
 		anon_sem_wait(swapsem);
 
-		struct timespec renderstart;
-		UBLC_chronos_gettime(&renderstart);
-		pthread_mutex_lock(&interpmut);
-		float d = UBLC_chronos_getdelta(&tickstart, &renderstart, tickdelta);
-		pthread_mutex_unlock(&interpmut);
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		setupcamera(d);
+		setupcamera();
 
 		glEnable(GL_CULL_FACE);
 
@@ -336,10 +328,8 @@ static void *render(void *i) {
 
 		glDisable(GL_TEXTURE_2D);
 
-		pthread_mutex_lock(&interpmut);
 		for (int i = 0; i < ZOMBIE_COUNT; ++i)
-			UBLC_zombie_render(zombies + i, d);
-		pthread_mutex_unlock(&interpmut);
+			UBLC_zombie_render(zombies + i);
 
 		glDisable(GL_POLYGON_SMOOTH);
 
@@ -362,20 +352,13 @@ static void *tick(void *_) {
 		UBLC_zombie_init(zombies + i, 128.0f, 0.0f, 128.0f);
 
 	while (!done) {
-		UBLC_chronos_gettime(&tickstart);
+		UBLC_chronos_setstart();
 
 		UBLC_player_tick(&player);
 		for (int i = 0; i < ZOMBIE_COUNT; ++i)
 			UBLC_zombie_tick(zombies + i);
 
-		float interp;
-		UBLC_chronos_sleeprate(&tickstart, 20, &interp);
-
-		pthread_mutex_lock(&interpmut);
-
-		tickdelta = interp;
-
-		pthread_mutex_unlock(&interpmut);
+		UBLC_chronos_sleeprate(20);
 	}
 
 	for (int i = 0; i < ZOMBIE_COUNT; ++i)

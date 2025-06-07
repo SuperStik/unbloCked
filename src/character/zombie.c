@@ -8,6 +8,7 @@
 #include <SDL3/SDL_opengl_glext.h>
 #include <SDL3/SDL_timer.h>
 
+#include "../chronos.h"
 #include "cube.h"
 #include "../level/level.h"
 #include "../textures.h"
@@ -134,7 +135,7 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 	}
 }
 
-void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
+void UBLC_zombie_render(struct UBLC_zombie *zom) {
 	struct UBLC_entity_pos pos;
 	UBLC_entity_getrenderpos(&(zom->ent), &pos);
 
@@ -176,6 +177,8 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 #endif /* SIMD_COMPILER_HAS_REQUIRED_FEATURES */
 
 	float yy = fabsf(sintbl[1]) / 4.0f;
+
+	float a = UBLC_chronos_getdelta();
 
 	glTranslatef(
 			pos.xo + (pos.x - pos.xo) * a,

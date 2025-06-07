@@ -1,4 +1,5 @@
 #include <err.h>
+#include <pthread.h>
 
 #include "chronos.h"
 
@@ -8,33 +9,73 @@ static float time2float(const struct timespec *t);
 static struct timespec diff_timespec(const struct timespec *start, const struct
 		timespec *end);
 
-int UBLC_chronos_gettime(struct timespec *start) {
-	return clock_gettime(CLOCK_UPTIME_RAW, start);
+static pthread_rwlock_t deltalock = PTHREAD_RWLOCK_INITIALIZER;
+static struct timespec starttime = {.tv_sec = 0, .tv_nsec = 0};
+static float delta;
+
+int UBLC_chronos_gettime(struct timespec *curtime) {
+	return clock_gettime(CLOCK_UPTIME_RAW, curtime);
 }
 
-int UBLC_chronos_sleeprate(const struct timespec *start, unsigned rate,
-		float *sleptfor) {
-	if (rate == 0)
-		return -1;
+struct timespec UBLC_chronos_getstart(void) {
+	pthread_rwlock_rdlock(&deltalock);
 
-	struct timespec end;
-	if (UBLC_chronos_gettime(&end))
-		return -1;
+	struct timespec start = starttime;
 
-	struct timespec delta = diff_timespec(start, &end);
-	struct timespec ideal = {.tv_sec = 0, .tv_nsec = 999999999 / rate};
+	pthread_rwlock_unlock(&deltalock);
 
-	struct timespec sleeptime = diff_timespec(&delta, &ideal);
+	return start;
+}
 
-	int ret = nanosleep(&sleeptime, NULL);
+int UBLC_chronos_setstart(void) {
+	pthread_rwlock_wrlock(&deltalock);
 
-	*sleptfor = time2float(&sleeptime);
+	int ret = UBLC_chronos_gettime(&starttime);
+
+	pthread_rwlock_unlock(&deltalock);
 
 	return ret;
 }
 
-float UBLC_chronos_getdelta(const struct timespec *tickstart, const struct timespec *renderstart, float tickdelta) {
-	struct timespec diff = diff_timespec(tickstart, renderstart);
+int UBLC_chronos_sleeprate(unsigned rate) {
+	if (rate == 0)
+		return -1;
+
+	struct timespec start, end;
+	if (UBLC_chronos_gettime(&end))
+		return -1;
+
+	start = UBLC_chronos_getstart();
+
+	struct timespec deltasleep = diff_timespec(&start, &end);
+	struct timespec ideal = {.tv_sec = 0, .tv_nsec = 999999999 / rate};
+
+	struct timespec sleeptime = diff_timespec(&deltasleep, &ideal);
+
+	int ret = nanosleep(&sleeptime, NULL);
+
+	pthread_rwlock_wrlock(&deltalock);
+
+	delta = time2float(&sleeptime);
+
+	pthread_rwlock_unlock(&deltalock);
+
+	return ret;
+}
+
+float UBLC_chronos_getdelta(void) {
+	struct timespec tickstart = UBLC_chronos_getstart();
+
+	struct timespec lerp;
+	UBLC_chronos_gettime(&lerp);
+
+	struct timespec diff = diff_timespec(&tickstart, &lerp);
+
+	pthread_rwlock_rdlock(&deltalock);
+
+	float tickdelta = delta;
+
+	pthread_rwlock_unlock(&deltalock);
 
 	return time2float(&diff) / tickdelta;
 }

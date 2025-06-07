@@ -29,6 +29,6 @@ void UBLC_zombie_delete(struct UBLC_zombie *);
 
 void UBLC_zombie_tick(struct UBLC_zombie *);
 
-void UBLC_zombie_render(struct UBLC_zombie *, float a);
+void UBLC_zombie_render(struct UBLC_zombie *);
 
 #endif /* CHARACTER_ZOMBIE_H */
