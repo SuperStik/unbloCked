@@ -19,13 +19,12 @@ unsigned UBLC_chunk_updates = 0;
 static struct UBLC_vbuffer cpuvbo[BUFFER_COUNT];
 
 void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
-	if (__atomic_load_n(&(chunk->_dirty), __ATOMIC_ACQUIRE)) {
+	char clean = __atomic_test_and_set(&(chunk->_clean), __ATOMIC_RELAXED);
+	if (__builtin_expect(!clean, 0)) {
 		__atomic_add_fetch(&UBLC_chunk_updates, 1ul, __ATOMIC_RELAXED);
 
 		rebuild(chunk, 0);
 		rebuild(chunk, 1);
-
-		__atomic_store_n(&(chunk->_dirty), 0, __ATOMIC_RELEASE);
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
@@ -54,7 +53,7 @@ struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 	chunk->y_hi = y_hi;
 	chunk->z_hi = z_hi;
 	glGenBuffers(2, chunk->_buffers);
-	chunk->_dirty = 1;
+	__atomic_clear(&(chunk->_clean), __ATOMIC_RELAXED);
 
 	return chunk;
 }
@@ -91,5 +90,5 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 }
 
 void UBLC_chunk_setdirty(struct UBLC_chunk *chunk) {
-	__atomic_store_n(&(chunk->_dirty), 1, __ATOMIC_RELEASE);
+	__atomic_clear(&(chunk->_clean), __ATOMIC_RELAXED);
 }

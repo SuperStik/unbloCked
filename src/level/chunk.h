@@ -18,7 +18,7 @@ struct UBLC_chunk {
 	unsigned y_hi;
 	unsigned z_hi;
 	unsigned _buffers[2];
-	unsigned char _dirty;
+	char _clean;
 };
 
 extern int UBLC_chunk_rebuilt_this_frame;
