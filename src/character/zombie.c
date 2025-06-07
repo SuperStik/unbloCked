@@ -84,9 +84,9 @@ void UBLC_zombie_destroystatic(void) {
 struct UBLC_zombie *UBLC_zombie_init(struct UBLC_zombie *zom, float x, float y,
 		float z) {
 	UBLC_entity_init(&(zom->ent));
-	zom->ent.x = x;
-	zom->ent.y = y;
-	zom->ent.z = z;
+	zom->ent.pos.x = x;
+	zom->ent.pos.y = y;
+	zom->ent.pos.z = z;
 
 	zom->timeoffs = (float)(drand48() * 1239813.0);
 	zom->rot = (float)(drand48() * M_PI * 2.0);
@@ -125,7 +125,7 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 	zom->ent.yd *= 0.98f;
 	zom->ent.zd *= 0.91f;
 
-	if (zom->ent.y > 100.0f || zom->ent.y < 0.0f)
+	if (zom->ent.pos.y > 100.0f || zom->ent.pos.y < 0.0f)
 		UBLC_entity_resetpos(&(zom->ent));
 
 	if (zom->ent.onground) {
@@ -135,6 +135,9 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 }
 
 void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
+	struct UBLC_entity_pos pos;
+	UBLC_entity_getrenderpos(&(zom->ent), &pos);
+
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, skin);
 
@@ -175,9 +178,9 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 	float yy = fabsf(sintbl[1]) / 4.0f;
 
 	glTranslatef(
-			zom->ent.xo + (zom->ent.x - zom->ent.xo) * a,
-			zom->ent.yo + (zom->ent.y - zom->ent.yo) * a + yy,
-			zom->ent.zo + (zom->ent.z - zom->ent.zo) * a
+			pos.xo + (pos.x - pos.xo) * a,
+			pos.yo + (pos.y - pos.yo) * a + yy,
+			pos.zo + (pos.z - pos.zo) * a
 		    );
 	glScalef(size, -size, size);
 	glRotatef(zom->rot * RAD2DEG + 180.0f, 0.0f, 1.0f, 0.0f);
@@ -201,7 +204,7 @@ void UBLC_zombie_render(struct UBLC_zombie *zom, float a) {
 	cubes[LEGL].pitch = sintbl[1] * 1.4f;
 	cubes[LEGR].pitch = -sintbl[1] * 1.4f;
 
-	float br = UBLC_level_getbrightness(zom->ent.x, zom->ent.y, zom->ent.z);
+	float br = UBLC_level_getbrightness(pos.x, pos.y, pos.z);
 	br *= br;
 
 	glColor3f(br, br, br);

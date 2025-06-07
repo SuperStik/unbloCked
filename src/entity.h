@@ -5,15 +5,20 @@
 
 #include <phys/AABB.h>
 
-struct UBLC_entity {
-	pthread_rwlock_t lock;
-	float xo;
-	float yo;
-	float zo;
-
+struct UBLC_entity_pos {
 	float x;
 	float y;
 	float z;
+
+	float xo;
+	float yo;
+	float zo;
+};
+
+struct UBLC_entity {
+	pthread_rwlock_t lock;
+
+	struct UBLC_entity_pos pos;
 
 	float xd;
 	float yd;
@@ -32,7 +37,10 @@ void UBLC_entity_delete(struct UBLC_entity *ply);
 void UBLC_entity_tick(struct UBLC_entity *ent);
 
 void UBLC_entity_turn(struct UBLC_entity *ent, float xo, float yo);
-void UBLC_entity_getangles(struct UBLC_entity *ent, float *pitch, float *yaw);
+
+void UBLC_entity_getangles(struct UBLC_entity *, float *pitch, float *yaw);
+void UBLC_entity_getpos(struct UBLC_entity *, float *x, float *y, float *z);
+void UBLC_entity_getrenderpos(struct UBLC_entity *, struct UBLC_entity_pos *);
 
 void UBLC_entity_move(struct UBLC_entity *ent, float xa, float ya, float za);
 void UBLC_entity_moverelative(struct UBLC_entity *ent, float xa, float za, float

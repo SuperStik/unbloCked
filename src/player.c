@@ -42,11 +42,14 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	__sincospif(ply->ent.pitch / -180.0f, &psin, &pcos);
 	__sincospif(ply->ent.yaw / 180.0f, &ysin, &ycos);
 
+	float x, y, z;
+	UBLC_entity_getpos(&(ply->ent), &x, &y, &z);
+
 	gvec(float,4) offset = {pcos * ysin, psin, -ycos * pcos, 0.0f};
 	offset *= 3.0f;
-	offset += (gvec(float,4)){ply->ent.x, ply->ent.y, ply->ent.z, 0.0f};
+	offset += (gvec(float,4)){x, y, z, 0.0f};
 
-	float start[3] = {ply->ent.x, ply->ent.y, ply->ent.z};
+	float start[3] = {x, y, z};
 	float end[3] = {offset[0], offset[1], offset[2]};
 
 	UBLC_level_clip(&hit, start, end);

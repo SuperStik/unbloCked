@@ -49,6 +49,24 @@ void UBLC_entity_getangles(struct UBLC_entity *ent, float *pitch, float *yaw) {
 	pthread_rwlock_unlock(&(ent->lock));
 }
 
+void UBLC_entity_getpos(struct UBLC_entity *ent, float *x, float *y, float *z) {
+	pthread_rwlock_rdlock(&(ent->lock));
+
+	*x = ent->pos.x;
+	*y = ent->pos.y;
+	*z = ent->pos.z;
+
+	pthread_rwlock_unlock(&(ent->lock));
+}
+
+void UBLC_entity_getrenderpos(struct UBLC_entity *ent, struct UBLC_entity_pos *pos) {
+	pthread_rwlock_rdlock(&(ent->lock));
+
+	*pos = ent->pos;
+
+	pthread_rwlock_unlock(&(ent->lock));
+}
+
 void UBLC_entity_move(struct UBLC_entity *ent, float xa, float ya, float za) {
 	float xaOrg = xa;
 	float yaOrg = ya;
@@ -83,9 +101,13 @@ void UBLC_entity_move(struct UBLC_entity *ent, float xa, float ya, float za) {
 	if (zaOrg != za)
 		ent->zd = 0.0f;
 
-	ent->x = (ent->aabb.x_lo + ent->aabb.x_hi) / 2.0f;
-	ent->y = ent->aabb.y_lo + 1.62f;
-	ent->z = (ent->aabb.z_lo + ent->aabb.z_hi) / 2.0f;
+	pthread_rwlock_wrlock(&(ent->lock));
+
+	ent->pos.x = (ent->aabb.x_lo + ent->aabb.x_hi) / 2.0f;
+	ent->pos.y = ent->aabb.y_lo + 1.62f;
+	ent->pos.z = (ent->aabb.z_lo + ent->aabb.z_hi) / 2.0f;
+
+	pthread_rwlock_unlock(&(ent->lock));
 }
 
 void UBLC_entity_moverelative(struct UBLC_entity *ent, float xa, float za, float
@@ -101,8 +123,13 @@ void UBLC_entity_moverelative(struct UBLC_entity *ent, float xa, float za, float
 	
 	float sinval, cosval;
 	__sincospif(ent->yaw / 180.0f, &sinval, &cosval);
+
+	pthread_rwlock_wrlock(&(ent->lock));
+
 	ent->xd += xa * cosval - za * sinval;
 	ent->zd += za * cosval + xa * sinval;
+
+	pthread_rwlock_unlock(&(ent->lock));
 }
 
 void UBLC_entity_resetpos(struct UBLC_entity *ent) {
@@ -115,21 +142,25 @@ void UBLC_entity_resetpos(struct UBLC_entity *ent) {
 void UBLC_entity_tick(struct UBLC_entity *ent) {
 	pthread_rwlock_wrlock(&(ent->lock));
 
-	ent->xo = ent->x;
-	ent->yo = ent->y;
-	ent->zo = ent->z;
+	ent->pos.xo = ent->pos.x;
+	ent->pos.yo = ent->pos.y;
+	ent->pos.zo = ent->pos.z;
 
 	pthread_rwlock_unlock(&(ent->lock));
 }
 
 static void setpos(struct UBLC_entity *ent, float x, float y, float z) {
-	ent->x = x;
-	ent->y = y;
-	ent->z = z;
+	pthread_rwlock_wrlock(&(ent->lock));
+
+	ent->pos.x = x;
+	ent->pos.y = y;
+	ent->pos.z = z;
 	ent->xd = 0.0f;
 	ent->yd = 0.0f;
 	ent->zd = 0.0f;
 	float w = 0.3f;
 	float h = 0.9f;
 	UBLC_AABB_INIT(&(ent->aabb), x - w, y - h, z - w, x + w, y + h, z + w);
+
+	pthread_rwlock_unlock(&(ent->lock));
 }

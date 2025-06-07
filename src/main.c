@@ -262,9 +262,12 @@ static void movecameratoplayer(float d) {
 	glRotatef(pitch, 1.0f, 0.0f, 0.0f);
 	glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 
-	float x = player.ent.xo + (player.ent.x - player.ent.xo) * d;
-	float y = player.ent.yo + (player.ent.y - player.ent.yo) * d;
-	float z = player.ent.zo + (player.ent.z - player.ent.zo) * d;
+	struct UBLC_entity_pos pos;
+	UBLC_entity_getrenderpos(&player.ent, &pos);
+
+	float x = pos.xo + (pos.x - pos.xo) * d;
+	float y = pos.yo + (pos.y - pos.yo) * d;
+	float z = pos.zo + (pos.z - pos.zo) * d;
 
 	glTranslatef(-x, -y, -z);
 }
