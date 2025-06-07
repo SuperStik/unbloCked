@@ -19,16 +19,14 @@ unsigned UBLC_chunk_updates = 0;
 static struct UBLC_vbuffer cpuvbo[BUFFER_COUNT];
 
 void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
-	pthread_mutex_lock(&(chunk->lock));
-
-	if (chunk->_dirty) {
+	if (__atomic_load_n(&(chunk->_dirty), __ATOMIC_ACQUIRE)) {
 		__atomic_add_fetch(&UBLC_chunk_updates, 1ul, __ATOMIC_RELAXED);
+
 		rebuild(chunk, 0);
 		rebuild(chunk, 1);
-		chunk->_dirty = 0;
-	}
 
-	pthread_mutex_unlock(&(chunk->lock));
+		__atomic_store_n(&(chunk->_dirty), 0, __ATOMIC_RELEASE);
+	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
 	GLenum glerr = glGetError();
@@ -57,14 +55,12 @@ struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
 	chunk->z_hi = z_hi;
 	glGenBuffers(2, chunk->_buffers);
 	chunk->_dirty = 1;
-	pthread_mutex_init(&(chunk->lock), NULL);
 
 	return chunk;
 }
 
 void UBLC_chunk_delete(struct UBLC_chunk *chunk) {
 	glDeleteBuffers(2, chunk->_buffers);
-	pthread_mutex_destroy(&(chunk->lock));
 }
 
 static void rebuild(struct UBLC_chunk *chunk, int layer) {
@@ -95,9 +91,5 @@ static void rebuild(struct UBLC_chunk *chunk, int layer) {
 }
 
 void UBLC_chunk_setdirty(struct UBLC_chunk *chunk) {
-	pthread_mutex_lock(&(chunk->lock));
-
-	chunk->_dirty = 1;
-
-	pthread_mutex_unlock(&(chunk->lock));
+	__atomic_store_n(&(chunk->_dirty), 1, __ATOMIC_RELEASE);
 }

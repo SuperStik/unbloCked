@@ -8,7 +8,6 @@
 #define CHUNK_SIZE 16
 
 struct UBLC_chunk {
-	pthread_mutex_t lock;
 	size_t indices[2];
 	struct UBLC_AABB aabb;
 	float vertices[CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 8];
@@ -19,7 +18,7 @@ struct UBLC_chunk {
 	unsigned y_hi;
 	unsigned z_hi;
 	unsigned _buffers[2];
-	unsigned char _dirty:1;
+	unsigned char _dirty;
 };
 
 extern int UBLC_chunk_rebuilt_this_frame;
