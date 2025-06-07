@@ -28,6 +28,9 @@ const struct UBLC_AABB *UBLC_level_getcubes(struct UBLC_AABB *, size_t *count);
 float UBLC_level_getbrightness(unsigned x, unsigned y, unsigned z);
 float UBLC_level_getbrightness_unsafe(unsigned x, unsigned y, unsigned z);
 
+int UBLC_level_islit(unsigned x, unsigned y, unsigned z);
+int UBLC_level_islit_unsafe(unsigned x, unsigned y, unsigned z);
+
 void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type);
 
 struct UBLC_hitresult *UBLC_level_clip(struct UBLC_hitresult *, float vstart[3],

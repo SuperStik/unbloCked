@@ -295,6 +295,31 @@ float UBLC_level_getbrightness_unsafe(unsigned x, unsigned y, unsigned z) {
 	return y < light_depths[x + z * UBLC_level_width] ? dark : light;
 }
 
+int UBLC_level_islit(unsigned x, unsigned y, unsigned z) {
+	if (x >= UBLC_level_width || y >= UBLC_level_depth || z >=
+			UBLC_level_height)
+		return 1;
+
+	int lit;
+
+	UBLC_level_rdlock();
+
+	lit = y >= light_depths[x + z * UBLC_level_width];
+
+	UBLC_level_unlock();
+
+	return lit;
+}
+
+int UBLC_level_islit_unsafe(unsigned x, unsigned y, unsigned z) {
+	if (x >= UBLC_level_width || y >= UBLC_level_depth || z >=
+			UBLC_level_height)
+		return 1;
+
+	return y >= light_depths[x + z * UBLC_level_width];
+}
+
+
 void UBLC_level_settile(unsigned x, unsigned y, unsigned z, unsigned type) {
 	if (x >= UBLC_level_width || y >= UBLC_level_depth || z >=
 			UBLC_level_height)

@@ -7,6 +7,8 @@
 #include "tesselator.h"
 #include "tile.h"
 
+static int shouldrenderface(unsigned x, unsigned y, unsigned z, int layer);
+
 size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 		int y, int z) {
 	float ulo = (float)tex / 16.0f;
@@ -30,88 +32,76 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 	struct UBLC_vbuffer *orig = buf;
 
 	/* my fingers hurt */
-	if (!UBLC_level_issolid_unsafe(x, y - 1, z)) {
-		br = UBLC_level_getbrightness_unsafe(x, y - 1, z) * side;
-		if ((br == side) ^ (layer == 1)) {
-			UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi,
-					br, br, br);
-		}
+	if (shouldrenderface(x, y - 1, z, layer)) {
+		br = side;
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi, br, br,
+				br);
 	}
 
-	if (!UBLC_level_issolid_unsafe(x, y + 1, z)) {
-		br = UBLC_level_getbrightness_unsafe(x, y + 1, z) * side;
-		if ((br == side) ^ (layer == 1)) {
-			UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vhi,
-					br, br, br);
-		}
+	if (shouldrenderface(x, y + 1, z, layer)) {
+		br = side;
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vhi, br, br,
+				br);
 	}
 
-	if (!UBLC_level_issolid_unsafe(x, y, z - 1)) {
-		br = UBLC_level_getbrightness_unsafe(x, y, z - 1) * frnt;
-		if ((br == frnt) ^ (layer == 1)) {
-			UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, uhi, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, ulo, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vhi,
-					br, br, br);
-		}
+	if (shouldrenderface(x, y, z - 1, layer)) {
+		br = frnt;
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, uhi, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vhi, br, br,
+				br);
 	}
 
-	if (!UBLC_level_issolid_unsafe(x, y, z + 1)) {
-		br = UBLC_level_getbrightness_unsafe(x, y, z + 1) * frnt;
-		if ((br == frnt) ^ (layer == 1)) {
-			UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, ulo, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, uhi, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vlo,
-					br, br, br);
-		}
+	if (shouldrenderface(x, y, z + 1, layer)) {
+		br = frnt;
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vlo, br, br,
+				br);
 	}
 
-	if (!UBLC_level_issolid_unsafe(x - 1, y, z)) {
-		br = UBLC_level_getbrightness_unsafe(x - 1, y, z) * botm;
-		if ((br == botm) ^ (layer == 1)) {
-			UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, uhi, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, ulo, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi,
-					br, br, br);
-		}
+	if (shouldrenderface(x - 1, y, z, layer)) {
+		br = botm;
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, uhi, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi, br, br,
+				br);
 	}
 
-	if (!UBLC_level_issolid_unsafe(x + 1, y, z)) {
-		br = UBLC_level_getbrightness_unsafe(x + 1, y, z) * botm;
-		if ((br == botm) ^ (layer == 1)) {
-			UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, uhi, vhi,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo,
-					br, br, br);
-			UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, ulo, vlo,
-					br, br, br);
-		}
+	if (shouldrenderface(x + 1, y, z, layer)) {
+		br = botm;
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, ulo, vlo, br, br,
+				br);
 	}
 
 	return buf - orig;
@@ -187,7 +177,14 @@ void UBLC_tile_renderface(struct UBLC_vbuffer buf[4], int x, int y, int z, enum 
 			UBLC_tesselator_vertex(buf + 2, xhi, yhi, zlo, 0.0f,
 					0.0f, br, br, br);
 			UBLC_tesselator_vertex(buf + 3, xhi, yhi, zhi, 0.0f,
-					0.0f, br, br, br);;
+					0.0f, br, br, br);
 			break;
 	}
+}
+
+static int shouldrenderface(unsigned x, unsigned y, unsigned z, int layer) {
+	int isclear = !UBLC_level_issolid_unsafe(x, y, z);
+	int islit = (UBLC_level_islit_unsafe(x, y, z) != layer);
+
+	return isclear && islit;
 }
