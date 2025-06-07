@@ -30,10 +30,6 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 
 	pthread_mutex_unlock(&(chunk->lock));
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
 	GLenum glerr = glGetError();
 	if (glerr)
@@ -47,11 +43,6 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 			(void *)offsetof(struct UBLC_vbuffer, r));
 
 	glDrawArrays(GL_QUADS, 0, chunk->indices[layer]);
-
-	glDisableClientState(GL_VERTEX_ARRAY);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
-
 }
 
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,

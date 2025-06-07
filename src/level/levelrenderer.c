@@ -90,9 +90,19 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, terrain);
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_COLOR_ARRAY);
+
 	size_t totalchunks = (size_t)xchunks * ychunks * zchunks;
 	for (size_t i = 0; i < totalchunks; ++i)
 		UBLC_chunk_render(&(chunks[i]), layer);
+
+	glDisableClientState(GL_VERTEX_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
+
 	glDisable(GL_TEXTURE_2D);
 
 	if (layer)
