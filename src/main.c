@@ -364,7 +364,7 @@ static void *tick(void *_) {
 			UBLC_zombie_tick(zombies + i);
 
 		float interp;
-		UBLC_chronos_sleeprate(&start, 60, &interp);
+		UBLC_chronos_sleeprate(&start, 20, &interp);
 
 		pthread_mutex_lock(&interpmut);
 

@@ -21,7 +21,7 @@ int UBLC_chronos_sleeprate(const struct timespec *start, unsigned rate,
 		return -1;
 
 	struct timespec delta = diff_timespec(start, &end);
-	struct timespec ideal = {.tv_sec = 0, .tv_nsec = 999999999 / 60};
+	struct timespec ideal = {.tv_sec = 0, .tv_nsec = 999999999 / rate};
 
 	struct timespec sleeptime = diff_timespec(&delta, &ideal);
 

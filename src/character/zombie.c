@@ -109,16 +109,16 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 	zom->rot += zom->rot_a;
 	zom->rot_a *= 0.99f;
 	zom->rot_a += (float)((drand48() - drand48()) * drand48() * drand48() *
-			0.01);
+			0.08);
 
 	__sincosf(zom->rot, &xa, &za);
 
-	if (zom->ent.onground && drand48() < 0.01)
-		zom->ent.yd = 0.12f;
+	if (zom->ent.onground && drand48() < 0.08)
+		zom->ent.yd = 0.5f;
 
-	UBLC_entity_moverelative(&(zom->ent), xa, za, zom->ent.onground ? 0.02f
-			: 0.005f);
-	zom->ent.yd -= 0.005f;
+	UBLC_entity_moverelative(&(zom->ent), xa, za, zom->ent.onground ? 0.1f
+			: 0.02f);
+	zom->ent.yd -= 0.08f;
 	UBLC_entity_move(&(zom->ent), zom->ent.xd, zom->ent.yd, zom->ent.zd);
 
 	zom->ent.xd *= 0.91f;
@@ -129,8 +129,8 @@ void UBLC_zombie_tick(struct UBLC_zombie *zom) {
 		UBLC_entity_resetpos(&(zom->ent));
 
 	if (zom->ent.onground) {
-		zom->ent.xd *= 0.8f;
-		zom->ent.zd *= 0.8f;
+		zom->ent.xd *= 0.7f;
+		zom->ent.zd *= 0.7f;
 	}
 }
 

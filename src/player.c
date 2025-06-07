@@ -101,22 +101,22 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 
 	if (keys & UBLC_KF_SPACE) {
 		if (grounded)
-			ply->ent.yd = 0.12;
+			ply->ent.yd = 0.5;
 
 		if (flying)
-			ya += 0.012;
+			ya += 0.1;
 	}
 
 	if ((keys & (UBLC_KF_LSHIFT | UBLC_KF_RSHIFT)) && flying)
-		ya -= 0.012;
+		ya -= 0.1;
 
 	ply->ent.yd += ya;
 
-	UBLC_entity_moverelative(&(ply->ent), xa, za, grounded ? 0.02f :
-			0.005f);
+	UBLC_entity_moverelative(&(ply->ent), xa, za, (grounded || flying) ?
+			0.1f : 0.02f);
 
 	if (!flying)
-		ply->ent.yd = (ply->ent.yd - 0.005f);
+		ply->ent.yd = (ply->ent.yd - 0.08f);
 
 	UBLC_entity_move(&(ply->ent), ply->ent.xd, ply->ent.yd, ply->ent.zd);
 	ply->ent.xd *= 0.91f;
@@ -124,12 +124,12 @@ void UBLC_player_tick(struct UBLC_player *ply) {
 	ply->ent.zd *= 0.91f;
 	
 	if (grounded) {
-		ply->ent.xd *= 0.8f;
-		ply->ent.zd *= 0.8f;
+		ply->ent.xd *= 0.7f;
+		ply->ent.zd *= 0.7f;
 	}
 
 	if (flying) {
-		ply->ent.yd *= 0.8f;
+		ply->ent.yd *= 0.7f;
 	}
 
 	if (oneshotkeys)
