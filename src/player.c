@@ -1,5 +1,6 @@
 #include <err.h>
 #include <math.h>
+#include <simd/math.h>
 
 #include "gccvec.h"
 #include "level/level.h"
@@ -36,16 +37,35 @@ int UBLC_player_getkeys(const struct UBLC_player *ply) {
 void UBLC_player_tick(struct UBLC_player *ply) {
 	struct UBLC_hitresult hit;
 
-	float psin, pcos;
-	float ysin, ycos;
+	float pitch, yaw;
+	UBLC_entity_getangles(&(ply->ent), &pitch, &yaw);
 
-	__sincospif(ply->ent.pitch / -180.0f, &psin, &pcos);
-	__sincospif(ply->ent.yaw / 180.0f, &ysin, &ycos);
+	gvec(float,2) osin;
+	gvec(float,2) ocos;
+	gvec(float,2) in = {pitch / -180.0f, yaw / 180.0f};
+
+#if SIMD_COMPILER_HAS_REQUIRED_FEATURES
+	sincospi(in, &osin, &ocos);
+#else
+	float psin, pcos, ysin, ycos;
+	__sincospif(in[0], &psin, &pcos);
+	__sincospif(in[1], &ysin, &ycos);
+	osin[0] = psin;
+	osin[1] = ysin;
+	ocos[0] = pcos;
+	ocos[1] = ycos;
+#endif /* SIMD_COMPILER_HAS_REQUIRED_FEATURES */
+
+	gvec(float,4) offset = {
+		ocos[0] * osin[1],
+		osin[0],
+		-ocos[1] * ocos[0],
+		0.0f
+	};
 
 	float x, y, z;
 	UBLC_entity_getpos(&(ply->ent), &x, &y, &z);
 
-	gvec(float,4) offset = {pcos * ysin, psin, -ycos * pcos, 0.0f};
 	offset *= 3.0f;
 	offset += (gvec(float,4)){x, y, z, 0.0f};
 
