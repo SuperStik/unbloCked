@@ -1,4 +1,12 @@
+#define GL_GLEXT_PROTOTYPES 1
+#include <err.h>
 #include <math.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+
+#include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL_opengl_glext.h>
 
 #include "gutl.h"
 
@@ -28,7 +36,61 @@ double *GUTL_perspectived(double matrix[16], double fovy, double aspect, double
 	return matrix;
 }
 
-const char *GUTL_errorstr(GLenum glerr) {
+unsigned GUTL_loadshaderfd(long t, int fd) {
+	GLenum type = (GLenum)t;
+	struct stat buf;
+	if (fstat(fd, &buf)) {
+		warn("GUTL_loadshaderfd: fstat: %i", fd);
+		return 0;
+	}
+
+	if (!(buf.st_mode & S_IFREG)) {
+		warnx("GUTL_loadshaderfd: %i: Expected a regular file", fd);
+		return 0;
+	}
+
+	char *source = mmap(NULL, buf.st_size + 1, PROT_READ, MAP_PRIVATE, fd,
+			0);
+	if (source == MAP_FAILED) {
+		warn("GUTL_loadshaderfd: mmap: %i", fd);
+		return 0;
+	}
+
+	GLuint shader = glCreateShader(type);
+	if (shader == 0) {
+		GLenum glerr = glGetError();
+		warnx("GUTL_loadshaderfd: glCreateShader: %s",
+				GUTL_errorstr(glerr));
+		return 0;
+	}
+
+	GLint len = -1;
+	glShaderSource(shader, 1, (const char **)&source, &len);
+
+	if (munmap(source, buf.st_size + 1))
+		warn("GUTL_loadshaderfd: munmap: %i", fd);
+
+	glCompileShader(shader);
+
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		GLint logsize;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logsize);
+
+		char *log = malloc(sizeof(char) * logsize);
+		glGetShaderInfoLog(shader, logsize, NULL, log);
+		warnx("GUTL_loadshaderfd: compiling shader %i failed:\n%s",
+				shader, log);
+		free(log);
+		return 0;
+	}
+
+	return shader;
+}
+
+const char *GUTL_errorstr(long e) {
+	GLenum glerr = (GLenum)e;
 	const char *str;
 	switch (glerr) {
 		case GL_INVALID_ENUM:
@@ -108,5 +170,3 @@ static void frustumd(double matrix[16], double left, double right, double
 	matrix[14] = (-temp * zfar) / temp4;
 	matrix[15] = 0.0;
 }
-
-
