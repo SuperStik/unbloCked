@@ -99,14 +99,12 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	for (size_t i = 0; i < totalchunks; ++i)
 		UBLC_chunk_render(&(chunks[i]), layer);
 
-	glDisableClientState(GL_VERTEX_ARRAY);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
 
 	glDisable(GL_TEXTURE_2D);
 
 	if (layer)
-		return;
+		goto flush;
 
 	int xlo, ylo, zlo, xhi, yhi, zhi;
 	char selected, facing;
@@ -119,7 +117,7 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	pthread_rwlock_unlock(&(player->ent.lock));
 
 	if (!selected)
-		return;
+		goto flush;
 
 	xhi = xlo + 1;
 	yhi = ylo + 1;
@@ -170,6 +168,7 @@ void UBLC_levelrenderer_render(struct UBLC_player *player, int layer) {
 	glDrawArrays(GL_QUADS, 0, 4);
 	glDisable(GL_BLEND);
 
+flush:
 	glDisableClientState(GL_COLOR_ARRAY);
 	glDisableClientState(GL_VERTEX_ARRAY);
 
