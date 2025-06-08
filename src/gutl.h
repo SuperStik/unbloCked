@@ -8,6 +8,8 @@ float *GUTL_perspectivef(float matrix[16], float fovy, float aspect, float
 double *GUTL_perspectived(double matrix[16], double fovy, double aspect, double
 		zNear, double zFar);
 
+unsigned GUTL_loadshaderfd(GLenum shadertype, int fd);
+
 const char *GUTL_errorstr(GLenum);
 
 #endif /* GUTL_H */
