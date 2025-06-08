@@ -49,6 +49,11 @@ struct {
 	float h;
 } winsize = {640.0f, 480.0f};
 
+struct {
+	int w;
+	int h;
+} pixels;
+
 static char done = 0;
 
 static struct UBLC_player player;
@@ -164,6 +169,11 @@ int main(void) {
 				case SDL_EVENT_WINDOW_RESIZED:
 					winsize.w = (float)event.window.data1;
 					winsize.h = (float)event.window.data2;
+					break;
+				case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+					pixels.w = event.window.data1;
+					pixels.h = event.window.data2;
+					break;
 			}
 		}
 	}
@@ -309,8 +319,17 @@ static void *render(void *i) {
 	glEnable(GL_FOG);
 	glFogi(GL_FOG_MODE, GL_EXP);
 
+	int w = 0;
+	int h = 0;
+
 	while (!done) {
 		anon_sem_wait(swapsem);
+
+		if (__builtin_expect(w != pixels.w || h != pixels.h, 0)) {
+			w = pixels.w;
+			h = pixels.h;
+			glViewport(0, 0, w, h);
+		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
