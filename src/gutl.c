@@ -36,7 +36,8 @@ double *GUTL_perspectived(double matrix[16], double fovy, double aspect, double
 	return matrix;
 }
 
-unsigned GUTL_loadshaderfd(GLenum type, int fd) {
+unsigned GUTL_loadshaderfd(long t, int fd) {
+	GLenum type = (GLenum)t;
 	struct stat buf;
 	if (fstat(fd, &buf)) {
 		warn("GUTL_loadshaderfd: fstat: %i", fd);
@@ -88,7 +89,8 @@ unsigned GUTL_loadshaderfd(GLenum type, int fd) {
 	return shader;
 }
 
-const char *GUTL_errorstr(GLenum glerr) {
+const char *GUTL_errorstr(long e) {
+	GLenum glerr = (GLenum)e;
 	const char *str;
 	switch (glerr) {
 		case GL_INVALID_ENUM:
