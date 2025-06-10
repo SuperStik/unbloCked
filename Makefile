@@ -9,9 +9,10 @@ RES := resources
 # TODO: make sure the base name has at least one character
 RES_SRC := $(shell find ${RES}/ -name '*.*')
 
-GLSL_SRC := ${RES}/shaders
+GLSL_SRC := ${SRC_DIR}/shaders
 GLSL_VERT := $(wildcard ${GLSL_SRC}/*.vert)
 GLSL_FRAG := $(wildcard ${GLSL_SRC}/*.frag)
+
 OBJ_DIR = ${OUT_DIR}/objects
 OBJ = $(patsubst src/%.c,${OBJ_DIR}/%.o,${SRC})
 RES_DIR = ${OUT_DIR}/resources
