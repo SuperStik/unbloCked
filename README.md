@@ -3,7 +3,7 @@
 ## A port of early classic Minecraft in C
 
 I made this as a way to learn some of the basics of OpenGL and SDL3, so forgive some of the spaghetti ahead.
-It runs on OpenGL 2.1, and uses VBOs for chunk rendering, and has some multithreading as well.
+It runs on OpenGL 3.3, and uses VBOs for chunk rendering, and has some multithreading as well.
 Currently, it is only built for macOS, but if I decide to, I'll try to make it more platform independent, whilst keeping some of the optimizations.
 
 ### Improvements
@@ -13,6 +13,7 @@ Currently, it is only built for macOS, but if I decide to, I'll try to make it m
 * Vertex buffers
 * Native, no Java used
 * Multithreading
+* Shaders
 
 ### Building
 
