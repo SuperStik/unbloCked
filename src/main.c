@@ -339,6 +339,7 @@ static void *render(void *i) {
 		}
 
 		glUseProgram(levelsh);
+		warnx("%u", levelsh);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		setupcamera();

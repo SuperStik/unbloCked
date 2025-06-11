@@ -40,7 +40,12 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 				br);
 		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vlo, br, br,
 				br);
+
 		UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vlo, br, br,
 				br);
 	}
 
@@ -52,7 +57,12 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 				br);
 		UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br, br,
 				br);
+
 		UBLC_tesselator_vertex(buf++, xlo, yhi, zhi, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br, br,
 				br);
 	}
 
@@ -64,7 +74,12 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 				br);
 		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vhi, br, br,
 				br);
+
 		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, ulo, vlo, br, br,
 				br);
 	}
 
@@ -76,7 +91,12 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 				br);
 		UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, uhi, vhi, br, br,
 				br);
+
 		UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, uhi, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, ulo, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zhi, uhi, vhi, br, br,
 				br);
 	}
 
@@ -88,7 +108,12 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 				br);
 		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, ulo, vhi, br, br,
 				br);
+
 		UBLC_tesselator_vertex(buf++, xlo, ylo, zhi, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, yhi, zlo, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xlo, ylo, zlo, ulo, vhi, br, br,
 				br);
 	}
 
@@ -100,7 +125,12 @@ size_t UBLC_tile_render(struct UBLC_vbuffer *buf, int tex, int layer, int x,
 				br);
 		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br, br,
 				br);
+
 		UBLC_tesselator_vertex(buf++, xhi, yhi, zhi, ulo, vlo, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, ylo, zlo, uhi, vhi, br, br,
+				br);
+		UBLC_tesselator_vertex(buf++, xhi, yhi, zlo, uhi, vlo, br, br,
 				br);
 	}
 

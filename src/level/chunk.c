@@ -13,7 +13,7 @@
 
 static void rebuild(struct UBLC_chunk *, int layer);
 
-#define BUFFER_COUNT (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE)
+#define BUFFER_COUNT (CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE * 6 * 3)
 
 unsigned UBLC_chunk_updates = 0;
 static struct UBLC_vbuffer cpuvbo[BUFFER_COUNT];
@@ -33,18 +33,22 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	if (glerr)
 		warnx("glBindBuffer: %s", GUTL_errorstr(glerr));
 
-	glVertexPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(struct
+				UBLC_vbuffer), (void *)offsetof(struct
+					UBLC_vbuffer, x));
+	glEnableVertexAttribArray(0);
+	/*glVertexPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, x));
 	glTexCoordPointer(2, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, u));
 	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
-			(void *)offsetof(struct UBLC_vbuffer, r));
+			(void *)offsetof(struct UBLC_vbuffer, r));*/
 
 	glGetError();
-	glDrawArrays(GL_QUADS, 0, chunk->indices[layer]);
+	glDrawArrays(GL_TRIANGLES, 0, chunk->indices[layer]);
 	glerr = glGetError();
-	if (glerr)
-		warnx("glDrawArrays: %s", GUTL_errorstr(glerr));
+	/*if (glerr)
+		warnx("glDrawArrays: %s", GUTL_errorstr(glerr));*/
 }
 
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,
