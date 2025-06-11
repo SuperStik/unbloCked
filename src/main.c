@@ -1,3 +1,4 @@
+#define GL_GLEXT_PROTOTYPES 1
 #include <err.h>
 #include <math.h>
 #include <pthread.h>
@@ -17,6 +18,7 @@
 #include "level/chunk.h"
 #include "level/levelrenderer.h"
 #include "level/level.h"
+#include "resources.h"
 
 struct threadinfo {
 	anon_sem_t swapsem;
@@ -39,6 +41,8 @@ static void mousemotionevent_handler(SDL_MouseMotionEvent *, SDL_Window *);
 static void mousedown_handler(SDL_MouseButtonEvent *, SDL_Window *);
 
 static void setupfog(int fog);
+
+static void buildshaders(unsigned *levelsh);
 
 static size_t frames = 0;
 
@@ -322,6 +326,9 @@ static void *render(void *i) {
 	int w = 0;
 	int h = 0;
 
+	unsigned levelsh;
+	buildshaders(&levelsh);
+
 	while (!done) {
 		anon_sem_wait(swapsem);
 
@@ -331,6 +338,7 @@ static void *render(void *i) {
 			glViewport(0, 0, w, h);
 		}
 
+		glUseProgram(levelsh);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		setupcamera();
@@ -590,4 +598,34 @@ static void setupfog(int fog) {
 			glLightModelfv(GL_LIGHT_MODEL_AMBIENT, light);
 			break;
 	}
+}
+
+#define LEVEL_VERTSOURCE "shaders/level.vert"
+#define LEVEL_FRAGSOURCE "shaders/level.frag"
+static void buildshaders(unsigned *levelsh) {
+	int lvfd = openat(UBLC_fs.resources, LEVEL_VERTSOURCE, O_RDONLY);
+	if (lvfd < 0)
+		err(2, "openat: %i %s", UBLC_fs.resources, LEVEL_VERTSOURCE);
+
+
+	int lffd = openat(UBLC_fs.resources, LEVEL_FRAGSOURCE, O_RDONLY);
+	if (lffd < 0)
+		err(2, "openat: %i %s", UBLC_fs.resources, LEVEL_FRAGSOURCE);
+
+	unsigned levelvert = GUTL_loadshaderfd(GL_VERTEX_SHADER, lvfd);
+	unsigned levelfrag = GUTL_loadshaderfd(GL_FRAGMENT_SHADER, lffd);
+
+	close(lvfd);
+	close(lffd);
+
+	unsigned prog = glCreateProgram();
+	glAttachShader(prog, levelvert);
+	glAttachShader(prog, levelfrag);
+	if (GUTL_linkandcheckprog(prog))
+		exit(1);
+
+	glDeleteShader(levelvert);
+	glDeleteShader(levelfrag);
+
+	*levelsh = prog;
 }

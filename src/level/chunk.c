@@ -27,6 +27,7 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 		rebuild(chunk, 1);
 	}
 
+	glGetError();
 	glBindBuffer(GL_ARRAY_BUFFER, chunk->_buffers[layer]);
 	GLenum glerr = glGetError();
 	if (glerr)
@@ -39,7 +40,11 @@ void UBLC_chunk_render(struct UBLC_chunk *chunk, int layer) {
 	glColorPointer(3, GL_FLOAT, sizeof(struct UBLC_vbuffer),
 			(void *)offsetof(struct UBLC_vbuffer, r));
 
+	glGetError();
 	glDrawArrays(GL_QUADS, 0, chunk->indices[layer]);
+	glerr = glGetError();
+	if (glerr)
+		warnx("glDrawArrays: %s", GUTL_errorstr(glerr));
 }
 
 struct UBLC_chunk *UBLC_chunk_init(struct UBLC_chunk *chunk, int x_lo, int y_lo,

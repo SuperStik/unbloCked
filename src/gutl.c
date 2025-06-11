@@ -56,7 +56,9 @@ unsigned GUTL_loadshaderfd(long t, int fd) {
 		return 0;
 	}
 
+	glGetError();
 	GLuint shader = glCreateShader(type);
+	warnx("%u", shader);
 	if (shader == 0) {
 		GLenum glerr = glGetError();
 		warnx("GUTL_loadshaderfd: glCreateShader: %s",
@@ -87,6 +89,27 @@ unsigned GUTL_loadshaderfd(long t, int fd) {
 	}
 
 	return shader;
+}
+
+int GUTL_linkandcheckprog(unsigned prog) {
+	glLinkProgram(prog);
+
+	int loglen;
+	glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &loglen);
+
+	if (loglen > 0) {
+		char *log = malloc(sizeof(char) * loglen);
+
+		glGetProgramInfoLog(prog, loglen, NULL, log);
+		warnx("glLinkProgram: linking program %u failed:\n%s", prog,
+				log);
+
+		free(log);
+
+		return -1;
+	}
+
+	return 0;
 }
 
 const char *GUTL_errorstr(long e) {

@@ -8,6 +8,8 @@ double *GUTL_perspectived(double matrix[16], double fovy, double aspect, double
 
 unsigned GUTL_loadshaderfd(long shadertype, int fd);
 
+int GUTL_linkandcheckprog(unsigned program);
+
 const char *GUTL_errorstr(long error);
 
 #endif /* GUTL_H */

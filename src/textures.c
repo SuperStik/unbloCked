@@ -64,6 +64,7 @@ long UBLC_textures_loadtexture(const char *resource, int mode) {
 
 	fclose(texfile);
 
+	glGetError();
 	glTexImage2D(GL_TEXTURE_2D, 0, internalformat, width, height, 0, format,
 			GL_UNSIGNED_BYTE, pixels);
 	GLenum glerr = glGetError();
