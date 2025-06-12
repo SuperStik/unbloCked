@@ -58,7 +58,7 @@ unsigned GUTL_loadshaderfd(long t, int fd) {
 
 	glGetError();
 	GLuint shader = glCreateShader(type);
-	warnx("%u", shader);
+
 	if (shader == 0) {
 		GLenum glerr = glGetError();
 		warnx("GUTL_loadshaderfd: glCreateShader: %s",

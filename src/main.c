@@ -19,6 +19,7 @@
 #include "level/levelrenderer.h"
 #include "level/level.h"
 #include "resources.h"
+#include "view.h"
 
 struct threadinfo {
 	anon_sem_t swapsem;
@@ -31,8 +32,8 @@ static void *tick(void *_);
 static void *framerate(void *_);
 
 static int translatekey(SDL_Keycode);
-static void movecameratoplayer(void);
-static void setupcamera(void);
+static void movecameratoplayer(unsigned shader);
+static void setupcamera(unsigned shader);
 
 static int keyevent_down_handler(SDL_KeyboardEvent *, SDL_Window *);
 static void keyevent_up_handler(SDL_KeyboardEvent *, SDL_Window *);
@@ -263,14 +264,9 @@ static int translatekey(SDL_Keycode key) {
 	return plykey;
 }
 
-static void movecameratoplayer(void) {
-	glTranslatef(0.0f, 0.0f, -0.3f);
-
+static void movecameratoplayer(unsigned shader) {
 	float pitch, yaw;
 	UBLC_entity_getangles(&(player.ent), &pitch, &yaw);
-
-	glRotatef(pitch, 1.0f, 0.0f, 0.0f);
-	glRotatef(yaw, 0.0f, 1.0f, 0.0f);
 
 	struct UBLC_entity_pos pos;
 	UBLC_entity_getrenderpos(&player.ent, &pos);
@@ -281,19 +277,23 @@ static void movecameratoplayer(void) {
 	float y = pos.yo + (pos.y - pos.yo) * d;
 	float z = pos.zo + (pos.z - pos.zo) * d;
 
-	glTranslatef(-x, -y, -z);
+	UBLC_view_view(-x, -y, -z - 0.3f, pitch, yaw);
+
+	float view[16];
+	UBLC_view_getview(view);
+	int uniform = glGetUniformLocation(shader, "view");
+	glUniformMatrix4fv(uniform, 1, false, view);
 }
 
-static void setupcamera(void) {
-	glMatrixMode(GL_PROJECTION);
+static void setupcamera(unsigned shader) {
+	UBLC_view_proj(90.0f, winsize.w / winsize.h, 0.05f, 1000.0f);
 
-	float matrix[16];
-	GUTL_perspectivef(matrix, 90.0f, winsize.w / winsize.h, 0.05f, 1000.0f);
-	glLoadMatrixf(matrix);
+	float proj[16];
+	UBLC_view_getproj(proj);
+	int uniform = glGetUniformLocation(shader, "proj");
+	glUniformMatrix4fv(uniform, 1, false, proj);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	movecameratoplayer();
+	movecameratoplayer(shader);
 }
 
 static void *render(void *i) {
@@ -339,10 +339,10 @@ static void *render(void *i) {
 		}
 
 		glUseProgram(levelsh);
-		warnx("%u", levelsh);
+
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		setupcamera();
+		setupcamera(levelsh);
 
 		glEnable(GL_CULL_FACE);
 
